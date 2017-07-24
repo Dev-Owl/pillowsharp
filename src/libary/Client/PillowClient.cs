@@ -11,6 +11,9 @@ using System.Reflection;
 using System.Collections.Generic;
 using RestSharp;
 using System.Linq;
+using System.IO;
+using PillowSharp.Helper;
+using System.Net;
 
 namespace PillowSharp.Client
 {
@@ -23,8 +26,8 @@ namespace PillowSharp.Client
         public const string Session = "_session";
         public const string CoockieName = "AuthSession";
         public const string NewUUID = "_uuids";
-        
         public const string ParamCount = "count";
+        public const string AllDocs="_all_docs";
 
         //Information about server,user and authentication method
         public ICouchdbServer ServerHelper { get; set; } 
@@ -59,6 +62,7 @@ namespace PillowSharp.Client
             this.JSONHelper = JSONHelper;
         }
 
+#region Server/DB Functions
         public async Task Authenticate()
         {
             //Only run this if auth type is set to token
@@ -92,6 +96,7 @@ namespace PillowSharp.Client
                 }
             }
         }
+
         //Get IDs ,UUID, from couchDB by default one 
         public async Task<CouchUUIDResponse> GetUUID(int Count=1)
         {
@@ -99,12 +104,6 @@ namespace PillowSharp.Client
             return JSONHelper.FromJSON<CouchUUIDResponse>( await RequestHelper.Get(NewUUID,new KeyValuePair<string, object>(ParamCount,Count)));
         }
        
-        //Internal, convert all response to the given object
-        private T FromResponse<T>(IRestResponse Response) where T:new()
-        {
-             return JSONHelper.FromJSON<T>(Response);
-        }
-        
         //Check if a db exists in the current server
         public async Task<bool> DbExists(string Name)
         {
@@ -134,6 +133,13 @@ namespace PillowSharp.Client
             return FromResponse<CouchConfirm>(result)?.ok ?? false;
         }
 
+        public async Task<bool> DeleteDatbase(string Name)
+        {
+            return JSONHelper.FromJSON<CouchConfirm>(await RequestHelper.Delete(Name))?.ok ?? false;
+        }
+#endregion
+
+#region Document Functions
         //Create a document in the given server and database
         public async Task<CouchDocumentChange> CreateDocument<T>(T NewDocument,string Database=null) where T:new()
         {
@@ -154,25 +160,36 @@ namespace PillowSharp.Client
             return result;
         }
         
+        //Delete a single document in the db
         public async Task<CouchDocumentChange> DeleteDocument<T>(T Document,string Database=null) where T:CouchDocument
+        {
+            return (await DeleteDocument<T>(new List<T>(){Document},Database))[0];
+        }
+
+        //Delete a list of documents in the db
+        public async Task<List<CouchDocumentChange>> DeleteDocument<T>(List<T> Documents,string Database=null) where T : CouchDocument
         {
             //Get datbase to use
             Database = GetDB(typeof(T),Database);
             //Create token if needed
             await Authenticate();
             //Ensure the document is marked as deleted
-            Document._deleted=true;
-            //As this is a single delete we still use the bulk operation that returns an array
-            return FromResponse<List<CouchDocumentChange>>( await Post($"{Database}/{BulkOperation}",JSONHelper.ToJSON(new CouchBulk(Document))))[0];
+            Documents.ForEach(d => d._deleted=true);
+            //Use bulk operation to delete the list of documents
+            return FromResponse<List<CouchDocumentChange>>( await Post($"{Database}/{BulkOperation}",JSONHelper.ToJSON(new CouchBulk(Documents as List<CouchDocument>)))); //TODO Ugly, rewrite
         }
 
-        //Shorthand fucntion for simple post request
-        private Task<IRestResponse> Post(string URL,string Body)
+        public async Task<CouchDocumentChange> UpdateDocument<T>(T Document,string Database) where T : CouchDocument
         {
-            return RequestHelper.Post(URL,Body);
+            return (await UpdateDocument<T>(new List<T>(){Document},Database))[0];
+        }
+
+        public async Task<List<CouchDocumentChange>> UpdateDocument<T>(List<T> Documents,string Database) where T : CouchDocument
+        {
+            //Use bulk to update list of documents in given db
+            return FromResponse<List<CouchDocumentChange>>( await Post($"{Database}/{BulkOperation}",JSONHelper.ToJSON(new CouchBulk(Documents as List<CouchDocument>)))); //TODO Ugly, rewrite
         }
         
-
         //Basic function to get a list of documents, allows the usage of views or any multi response URL
         public async Task<CouchDocumentResponse<T>> GetDocuments<T>(string RequestURL) where T: new() 
         {
@@ -182,6 +199,7 @@ namespace PillowSharp.Client
            var result = await RequestHelper.Get(RequestURL);
            return FromResponse<CouchDocumentResponse<T>>(result);
         }
+
         //Get a single document, optional with rev number
         public async Task<T> GetDocument<T>(string ID,string Revision=null,string Database=null) where T : new()
         {
@@ -192,6 +210,43 @@ namespace PillowSharp.Client
             var result = await RequestHelper.GetDocument(ID,Database,Revision:Revision);
             return FromResponse<T>(result);
         }
+
+        //Get all documents in the given database
+        public async Task<CouchDocumentResponse<T>> GetAllDocuments<T>(string Database=null) where T : new()
+        {
+            Database = GetDB(typeof(T),Database); // Get database to use
+            return JSONHelper.FromJSON<CouchDocumentResponse<T>>( await RequestHelper.Get($"{Database}/{AllDocs}")); //return result to client
+        }
+        
+        public async Task<CouchDocumentChange> AddAttachment<T>(T Document,string AttributeName,string File,string Database=null) where T : CouchDocument
+        {
+            if(!System.IO.File.Exists(File))
+                throw new PillowException($"Unable to find file {File}!");
+            Database = GetDB(typeof(T),Database);
+            return JSONHelper.FromJSON<CouchDocumentChange>( await RequestHelper.UploadFile(Document._id,AttributeName,Document._rev,Database,File));
+        }
+
+        public async Task<byte[]> GetAttachement<T>(T Document,string AttributeName,string Database=null) where T : CouchDocument
+        {
+            Database = GetDB(typeof(T),Database);
+            //Ask for file data
+            var response = await RequestHelper.GetFile(Document._id,AttributeName,Document._rev,Database);
+            //In case something went wrong throw an error
+            if(response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created)
+                PillowErrorHelper.HandleNoneOKResponse(response,JSONHelper);
+            //Return file data
+            return response.RawBytes;
+        }
+
+        public async Task<CouchDocumentChange> DeleteAttachment<T>(T Document,string AttributeName,string Database=null) where T : CouchDocument
+        {
+            Database = GetDB(typeof(T),Database);
+            return JSONHelper.FromJSON<CouchDocumentChange>( await RequestHelper.DeleteFile(Document._id,AttributeName,Document._rev,Database));
+        }
+
+#endregion
+
+#region Private Functions        
         //Get the DB to use
         //Priority list:
         // 1. Caller Parameter
@@ -201,13 +256,16 @@ namespace PillowSharp.Client
         {
             //If DB provided by caller nothing to do
             if(string.IsNullOrEmpty(Database)){
-                //Override with class DB if set
-                Database = this.Database;
-                if(string.IsNullOrEmpty(Database) && T != null)
+ 
+                if(T != null)
                 {
                     //Last try check if document type has DBNameAttribute set
                     Database = (T.GetTypeInfo().GetCustomAttribute(typeof(DBNameAttribute))as DBNameAttribute)?.Name;
                 }
+                //Override with class DB if set
+                if(string.IsNullOrEmpty(Database))
+                    Database = this.Database;
+
                 //Fail if no DB was found
                 if(string.IsNullOrEmpty(Database))
                     throw new PillowException("No database set, unable to request");
@@ -216,7 +274,19 @@ namespace PillowSharp.Client
             return Database;
         }
 
+        //Shorthand fucntion for simple post request
+        private Task<IRestResponse> Post(string URL,string Body)
+        {
+            return RequestHelper.Post(URL,Body);
+        }
 
+                //Internal, convert all response to the given object
+        private T FromResponse<T>(IRestResponse Response) where T:new()
+        {
+             return JSONHelper.FromJSON<T>(Response);
+        }
+#endregion       
+        
         
 
     }

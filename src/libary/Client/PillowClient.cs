@@ -21,7 +21,10 @@ namespace PillowSharp.Client
         public const string AllDBQuery = "_all_dbs";
         public const string BulkOperation = "_bulk_docs";
         public const string Session = "_session";
-        public const string CoockieName="AuthSession";
+        public const string CoockieName = "AuthSession";
+        public const string NewUUID = "_uuids";
+        
+        public const string ParamCount = "count";
 
         //Information about server,user and authentication method
         public ICouchdbServer ServerHelper { get; set; } 
@@ -88,6 +91,11 @@ namespace PillowSharp.Client
                     RequestHelper.SetCoockie(CoockieName,token);
                 }
             }
+        }
+
+        public async Task<CouchUUIDResponse> GetUUID(int Count=1)
+        {
+             return JSONHelper.FromJSON<CouchUUIDResponse>( await RequestHelper.Get(NewUUID,new KeyValuePair<string, object>(ParamCount,Count)));
         }
        
         //Internal, convert all response to the given object

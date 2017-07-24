@@ -1,10 +1,10 @@
 # Pillowsharp
 
 ## Content
-1. Description
-2. Setup
-3. Basic usage
-4. By example
+* Description
+* Setup
+* Basic usage
+* By example:
   * Create database
   * Create document
   * Get documents

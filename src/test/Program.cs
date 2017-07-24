@@ -27,6 +27,7 @@ namespace test
             try
             {
                 await ListDB();
+                await GetUUIDS();
                 await CreateDB();
                 await AddDocuments();
                 await GetDocuments();
@@ -50,6 +51,14 @@ namespace test
             dbs.ForEach(db => Console.WriteLine($"Found DB {db}"));
         }
 
+        public static async Task GetUUIDS(){
+            Console.WriteLine("Lets get 10 UUIDS from couch server");
+            var uuidResponse = await client.GetUUID(Count:10);
+            foreach(var id in uuidResponse.uuids){
+                Console.WriteLine(id);
+            }
+            Console.WriteLine("Easy as cake");
+        }
         public static async Task CreateDB()
         {
             Console.WriteLine("Creating DB pillow");

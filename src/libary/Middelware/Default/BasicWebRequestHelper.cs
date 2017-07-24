@@ -8,6 +8,8 @@ using PillowSharp.Helper;
 using System.Linq;
 using PillowSharp.Client;
 using System.Collections.Generic;
+using RestSharp.Extensions.MonoHttp;
+using System.IO;
 
 namespace PillowSharp.Middelware.Default 
 {
@@ -75,7 +77,7 @@ namespace PillowSharp.Middelware.Default
                 foreach(var keyValue in Parameter)
                 {
                     if(keyValue.Key != null && keyValue.Value != null)
-                        getRequest.AddParameter(keyValue.Key,keyValue.Value);
+                        getRequest.AddQueryParameter(keyValue.Key,keyValue.Value.ToString());
                 }
             }
             return Request(getRequest);
@@ -90,7 +92,7 @@ namespace PillowSharp.Middelware.Default
 
         public override Task<IRestResponse> Delete(string Uri)
         {
-            throw new NotImplementedException();
+            return Request( BuildRequestBase(Uri,Method.DELETE));
         }
 
         public override Task<IRestResponse> Post(string Uri, string Body = null)
@@ -101,6 +103,33 @@ namespace PillowSharp.Middelware.Default
             return Request(postRequest);
         }
 
+        private RestRequest BuildFileBaseRequest(string ID, string AttachmentName, string Revision, string Database,Method Method)
+        {
+            AttachmentName = HttpUtility.UrlEncode(AttachmentName);
+            var getRequest = BuildRequestBase($"{Database}/{ID}/{AttachmentName}",Method);
+            getRequest.AddQueryParameter(Rev,Revision);
+            return getRequest;
+        }
+
+        public override Task<IRestResponse> UploadFile(string ID,string AttachmentName,string Revision,string Database,string File)
+        {
+            var putRequest = BuildFileBaseRequest(ID,AttachmentName,Revision,Database,Method.PUT);
+            var contentType = MimeMapping.GetMimeType(File);
+            putRequest.AlwaysMultipartFormData = false;
+            putRequest.AddHeader("Content-Type",contentType);
+            putRequest.AddParameter(contentType, System.IO.File.ReadAllBytes(File), ParameterType.RequestBody);
+            return Request(putRequest);
+        }
+        public override Task<IRestResponse> DeleteFile(string ID, string AttachmentName, string Revision, string Database)
+        {
+            var deleteRequest = BuildFileBaseRequest(ID,AttachmentName,Revision,Database,Method.DELETE);
+            return Request(deleteRequest);
+        }
+
+        public override Task<IRestResponse> GetFile(string ID, string AttachmentName, string Revision, string Database)
+        {
+            return Request(BuildFileBaseRequest(ID,AttachmentName,Revision,Database,Method.GET));
+        }
         public override void SetCoockie(string CoockieName, string Value)
         {
             var currentCoockie = client.CookieContainer.GetCookies(serverURI)[CoockieName];

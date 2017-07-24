@@ -6,6 +6,7 @@ using PillowSharp.Middelware.Default;
 using System.Linq;
 using PillowSharp.CouchType;
 using Newtonsoft.Json;
+using System.IO;
 
 namespace test
 {
@@ -30,6 +31,9 @@ namespace test
                 await GetUUIDS();
                 await CreateDB();
                 await AddDocuments();
+                await UploadFileToDocument();
+                await GetFileFromDocument();
+                await DeleteFileFromDocument();
                 await GetDocuments();
                 await DeleteDocument();
             }
@@ -44,7 +48,6 @@ namespace test
             }
             
         }
-
         public static async Task ListDB(){
             Console.WriteLine("DB on server:");
             var dbs = await client.AllDatabase();
@@ -80,18 +83,43 @@ namespace test
             if(result.ok)
             {
                 Console.WriteLine($"Document created with id:{result.id} and rev:{result.rev}");
-                person.CouchDocumnet = result.ToCouchDocument();
+                person.CouchDocument = result.ToCouchDocument();
             }
         }
+        private static async Task UploadFileToDocument()
+        {
+            Console.WriteLine("Uploading sleepy owl");
+            var result =  await client.AddAttachment(person.CouchDocument,"fav.image","sleepy_owl.JPG");
+            if(result.ok){
+                Console.WriteLine("Attachment added");
+                person.CouchDocument = result.ToCouchDocument();
+            }
+        }
+
+        public static async Task GetFileFromDocument()
+        {
+             Console.WriteLine("Downloading sleepy owl");
+            var result =  await client.GetAttachement(person.CouchDocument,"fav.image");
+            Console.WriteLine($"Got the file back, file has {result.Count()} bytes");
+        }
+
+        public static async Task DeleteFileFromDocument()
+        {
+            var result =  await client.DeleteAttachment(person.CouchDocument,"fav.image");
+            if(result.ok){
+                 Console.WriteLine($"The file is now deleted");
+            }
+        }
+
         public static async Task GetDocuments(){
             Console.WriteLine("Get documents from pillow");
-            var result = await client.GetDocument<Person>(person.CouchDocumnet._id);
+            var result = await client.GetDocument<Person>(person.CouchDocument._id);
             Console.WriteLine(result.ToString());
         }
         
         public static async Task DeleteDocument(){
             Console.WriteLine("Deleting document from pillow");
-            var result = await client.DeleteDocument(person.CouchDocumnet);
+            var result = await client.DeleteDocument(person.CouchDocument);
             if(result.ok){
                 Console.WriteLine("Document deleted");
             }
@@ -108,7 +136,7 @@ namespace test
 
             public string Role { get; set; }
             [JsonIgnore]
-            public CouchDocument CouchDocumnet { get; set; }
+            public CouchDocument CouchDocument { get; set; }
 
             public new string ToString(){
                 return $"Hello my name is {Name} {LastName} and Im working as {Role}";

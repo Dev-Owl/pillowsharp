@@ -7,6 +7,7 @@ using RestSharp.Authenticators;
 using PillowSharp.Helper;
 using System.Linq;
 using PillowSharp.Client;
+using System.Collections.Generic;
 
 namespace PillowSharp.Middelware.Default 
 {
@@ -59,17 +60,26 @@ namespace PillowSharp.Middelware.Default
         //Get a single document with the given revesion number from the db
         public override Task<IRestResponse> GetDocument(string ID, string Database, string Revision = null)
         {
-            var getRequest = BuildRequestBase($"{Database}/{ID}");
-            if(!string.IsNullOrEmpty(Revision))
-                getRequest.AddQueryParameter(Rev,Revision);
-            return Request(getRequest); //TODO check if really not yet excuted
+           return Get($"{Database}/{ID}",new KeyValuePair<string, object>(Rev,Revision));
         }
         public override Task<IRestResponse> Get(string Url)
         {
            return Request(BuildRequestBase(Url));
         }
-
-      
+        
+        public override Task<IRestResponse> Get(string Url, params KeyValuePair<string,object>[] Parameter)
+        {
+            var getRequest = BuildRequestBase(Url);
+            if(Parameter != null)
+            {
+                foreach(var keyValue in Parameter)
+                {
+                    if(keyValue.Key != null && keyValue.Value != null)
+                        getRequest.AddParameter(keyValue.Key,keyValue.Value);
+                }
+            }
+            return Request(getRequest);
+        }
         public override Task<IRestResponse> Put(string Url, string Body = null)
         {
             var putRequest = BuildRequestBase(Url,Method.PUT);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using PillowSharp.BaseObject;
 using RestSharp;
@@ -23,6 +24,8 @@ namespace PillowSharp.Middelware
         public abstract Task<IRestResponse> GetDocument(string ID,string Database,string Revision=null);
         
         public abstract Task<IRestResponse> Get(string Url);
+        public abstract Task<IRestResponse> Get(string Url,params KeyValuePair<string,object>[] Parameter);
+        
         public abstract Task<IRestResponse> Put(string Url,string Body=null);
 
         public abstract Task<IRestResponse> Delete(string Uri);

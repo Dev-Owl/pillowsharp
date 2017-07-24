@@ -92,10 +92,11 @@ namespace PillowSharp.Client
                 }
             }
         }
-
+        //Get IDs ,UUID, from couchDB by default one 
         public async Task<CouchUUIDResponse> GetUUID(int Count=1)
         {
-             return JSONHelper.FromJSON<CouchUUIDResponse>( await RequestHelper.Get(NewUUID,new KeyValuePair<string, object>(ParamCount,Count)));
+            //Make the request and return the list of IDS 
+            return JSONHelper.FromJSON<CouchUUIDResponse>( await RequestHelper.Get(NewUUID,new KeyValuePair<string, object>(ParamCount,Count)));
         }
        
         //Internal, convert all response to the given object

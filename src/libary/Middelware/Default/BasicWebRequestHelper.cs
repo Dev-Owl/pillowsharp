@@ -44,7 +44,7 @@ namespace PillowSharp.Middelware.Default
         private RestRequest BuildRequestBase(string Resource,Method Method = Method.GET,int TimeOut = 30){
             var request = new RestRequest();
             request.Method = Method;
-            request.Timeout = TimeOut;
+            request.Timeout = TimeOut * 1000;
             request.Resource = Resource;
             return request;
         }

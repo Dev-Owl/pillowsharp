@@ -11,6 +11,13 @@ namespace PillowSharp.Middelware.Default
 {
     public class BasicJSONHelper : IJSONHelper
     {
+
+        public BasicJSONHelper(bool IgnoreNull = true)
+        {
+            if(IgnoreNull)
+                JsonConvert.DefaultSettings = () => new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
+        }
+
         public T FromJSON<T>(string JSON) where T : new()
         {
             return (T)JsonConvert.DeserializeObject(JSON,typeof(T));

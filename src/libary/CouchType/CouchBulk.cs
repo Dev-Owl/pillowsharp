@@ -5,21 +5,21 @@ using PillowSharp.Middelware;
 
 namespace PillowSharp.CouchType
 {
-    public class CouchBulk
+    public class CouchBulk<T> where T:CouchDocument
     {
-        public List<CouchDocument> docs { get; set; }
+        public List<T> docs { get; set; }
 
         public CouchBulk()
         {
-            docs = new List<CouchDocument>();
+            docs = new List<T>();
         }
 
-        public CouchBulk(CouchDocument Document)
+        public CouchBulk(T Document)
         {
-            docs = new List<CouchDocument>(){Document};
+            docs = new List<T>(){Document};
         }
 
-        public CouchBulk(List<CouchDocument> Documents)
+        public CouchBulk(List<T> Documents)
         {
             docs = Documents;
         }

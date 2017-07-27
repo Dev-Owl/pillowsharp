@@ -18,6 +18,7 @@ namespace PillowSharp.Middelware
             this._server = Server;
         }
 
+        public abstract void UpdateServerData(ICouchdbServer Server);
         public abstract void SetCoockie(string CoockieName,string Value);
 
         

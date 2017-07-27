@@ -25,6 +25,11 @@ namespace PillowSharp.Middelware.Default
         //Create the middelware and pass server data to it
         public BasicWebRequestHelper(ICouchdbServer Server):base(Server)
         {
+            UpdateServerData(Server);
+        }
+
+        public override void UpdateServerData(ICouchdbServer Server)
+        {
             //Creteate the rest clinet
             client = new RestClient(Server.GetServerURL());
             //Generate needed data for selected auth type
@@ -38,7 +43,6 @@ namespace PillowSharp.Middelware.Default
                 client.CookieContainer = cookieContainer;
                 serverURI = new Uri(Server.GetServerURL());
             }
-           
         }
         
         private RestRequest BuildRequestBase(string Resource,Method Method = Method.GET,int TimeOut = 30){

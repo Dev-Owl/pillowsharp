@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #exit if any command fails
 set -e
+cd "$(dirname "$0")"
 artifactsFolder="./artifacts"
 
 if [ -d $artifactsFolder ]; then  

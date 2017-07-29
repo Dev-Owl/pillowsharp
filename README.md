@@ -1,5 +1,7 @@
 # Pillowsharp
 
+[![Build Status](https://travis-ci.org/Dev-Owl/pillowsharp.svg?branch=master)](https://travis-ci.org/Dev-Owl/pillowsharp)
+
 ## Content
 * Description
 * Setup

@@ -8,36 +8,31 @@ using System.Threading.Tasks;
 
 namespace test
 {
-    public class Authentication : IDisposable
+    public class AuthenticationDBCreationTests : IDisposable
     {
-        PillowClient client = null;
+        public const string DBName = "pillowtest_auth";
 
-        public Authentication()
-        {
-            client = new  PillowClient(new BasicCouchDBServer("http://127.0.0.1:5984",new CouchLoginData("",""),ELoginTypes.BasicAuth));
-        }
-      
 
         [Theory]
-        [InlineData("admin","admin")]
-        public void CreateDB(string User,string Password)
+        [InlineData(ELoginTypes.BasicAuth)]
+        [InlineData(ELoginTypes.TokenLogin)]
+        public void CreateDBBothAuth(ELoginTypes Type)
         {
-            LoginCreateDB(User,Password).Wait();
+            LoginCreateDB("admin","admin",Type).Wait();
         }
 
-        private async Task LoginCreateDB(string User,string Password){
-            client.ServerHelper = new BasicCouchDBServer("http://127.0.0.1:5984",new CouchLoginData(User,Password),ELoginTypes.BasicAuth); 
-            var result = await client.CreateDatabase("pillowtest");
-            Assert.True(result,"Unable to create the db");
+        public void Dispose()
+        {
+            var client = CouchSettings.GetTestClient();
+            client.DeleteDatbase(DBName).Wait();
+        }
+
+        private async Task LoginCreateDB(string User,string Password,ELoginTypes Type){
+            var client = new PillowClient(new BasicCouchDBServer("http://127.0.0.1:5984",new CouchLoginData(User,Password),Type));
+            var result = await client.CreateDatabase(DBName);
+            Assert.True(result,$"Unable to create the db, with {Type.ToString("G")}");
         }   
 
-        void IDisposable.Dispose()
-        {
-           client.ServerHelper = new BasicCouchDBServer("http://127.0.0.1:5984",new CouchLoginData("admin","admin"),ELoginTypes.BasicAuth); 
-           if(client.DbExists("pillowtest").Result)
-            client.DeleteDatbase("pillowtest").Wait();
-           client = null;
-        }
         
     }
 }

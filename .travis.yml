@@ -1,4 +1,7 @@
 language: csharp
+branches:  
+  only:
+    - master
 solution: pillowsharp.csproj
 mono: none
 dotnet: 1.0.4

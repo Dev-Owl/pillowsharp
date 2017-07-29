@@ -5,8 +5,12 @@ branches:
 solution: pillowsharp.csproj
 mono: none
 dotnet: 1.0.4
+services:
+  - couchdb
+before_script:
+  -  curl -X PUT localhost:5984/_config/admins/admin -d '"admin"'
 script: 
-- ./src/build.sh
+  - ./src/build.sh
 branches:  
   only:
     - master

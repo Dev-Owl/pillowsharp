@@ -1,0 +1,9 @@
+language: csharp
+solution: pillowsharp.csproj
+mono: none
+dotnet: 1.0.4
+script: 
+- ./src/build.sh
+branches:  
+  only:
+    - master

@@ -152,9 +152,22 @@ namespace test
             return testFileName;
 
         }
+        [Fact]
+        public void GetAttachment()
+        {
+             _CreateDocument().Wait();            
+            var file = RandomTextFile();
+            Assert.True( File.Exists(file));
+            _AddAttachment(file).Wait();
+            _GetAttachment(file).Wait();
+        }
 
-        public void GetAttachment(){
-
+        private async Task _GetAttachment(string FilePath)
+        {
+            var expectedSize = File.ReadAllBytes(FilePath);
+            var client = CouchSettings.GetTestClient();
+            var result =  await client.GetAttachement(LastDocument,"test.txt");
+            Assert.True(expectedSize.Count() == result.Count(),"File size is different");
         }
 
         public void DeleteAttachement(){

@@ -184,7 +184,7 @@ namespace test
 
             public TestDocumentSmall()
             {
-                TestProp ="fuBar";
+                TestProp ="FuBar";
             }
         }
     }

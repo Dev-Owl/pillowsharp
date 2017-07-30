@@ -170,8 +170,21 @@ namespace test
             Assert.True(expectedSize.Count() == result.Count(),"File size is different");
         }
 
+        [Fact]
         public void DeleteAttachement(){
+            _CreateDocument().Wait();            
+            var file = RandomTextFile();
+            Assert.True( File.Exists(file));
+            _AddAttachment(file).Wait();
+            _DeleteAttachment().Wait();
+        }
 
+        private async Task _DeleteAttachment()
+        {
+             var client = CouchSettings.GetTestClient();
+             var result = await client.DeleteAttachment(LastDocument,"test.txt");
+             Assert.True(result.ok,"Returned result was not true");
+             Assert.True(result.rev == LastDocument._rev,"Revision was not updated as expected");
         }
 
         public void Dispose()

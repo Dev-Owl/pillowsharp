@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using PillowSharp.CouchType;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.IO;
 namespace test
 {
     public class DocumentTests : IDisposable
@@ -126,8 +126,30 @@ namespace test
         }
 
 
-
+        [Fact]
         public void AddAttachment(){
+            //Generate test file with random contens as txt
+            _CreateDocument().Wait();            
+            var file = RandomTextFile();
+            Assert.True( File.Exists(file));
+            _AddAttachment(file).Wait();
+        }
+        private async Task _AddAttachment(string File){
+            var client = CouchSettings.GetTestClient();
+            var result =  await client.AddAttachment(LastDocument,File,"test.txt");
+            Assert.True(result.ok,"Add attachment failed");
+            Assert.True(result.rev == LastDocument._rev,"Revision was not updated");
+        }
+        private string RandomTextFile(){
+            var testFileName = "test.txt";
+            if(File.Exists(testFileName))
+            {
+                File.Delete(testFileName);
+            }
+            Random random = new Random();
+            File.WriteAllText(testFileName,new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", random.Next(100,1337))
+                            .Select(s => s[random.Next(s.Length)]).ToArray()));
+            return testFileName;
 
         }
 

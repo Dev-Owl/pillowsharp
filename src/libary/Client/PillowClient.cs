@@ -283,7 +283,11 @@ namespace PillowSharp.Client
             if(!System.IO.File.Exists(File))
                 throw new PillowException($"Unable to find file {File}!");
             Database = GetDB(typeof(T),Database);
-            return JSONHelper.FromJSON<CouchDocumentChange>( await RequestHelper.UploadFile(Document._id,AttributeName,Document._rev,Database,File));
+            var result = JSONHelper.FromJSON<CouchDocumentChange>( await RequestHelper.UploadFile(Document._id,AttributeName,Document._rev,Database,File));
+            if(result.ok){
+                Document._rev = result.rev; // Update revision number for caller
+            }
+            return result;
         }
 
         public async Task<byte[]> GetAttachement<T>(T Document,string AttributeName,string Database=null) where T : CouchDocument

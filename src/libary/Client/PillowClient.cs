@@ -305,7 +305,11 @@ namespace PillowSharp.Client
         public async Task<CouchDocumentChange> DeleteAttachment<T>(T Document,string AttributeName,string Database=null) where T : CouchDocument
         {
             Database = GetDB(typeof(T),Database);
-            return JSONHelper.FromJSON<CouchDocumentChange>( await RequestHelper.DeleteFile(Document._id,AttributeName,Document._rev,Database));
+            var result = JSONHelper.FromJSON<CouchDocumentChange>( await RequestHelper.DeleteFile(Document._id,AttributeName,Document._rev,Database));
+            if(result.ok){
+                Document._rev = result.rev;
+            }
+            return result;
         }
 
 #endregion

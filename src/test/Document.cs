@@ -171,12 +171,36 @@ namespace test
         }
 
         [Fact]
-        public void DeleteAttachement(){
-            _CreateDocument().Wait();            
-            var file = RandomTextFile();
-            Assert.True( File.Exists(file));
-            _AddAttachment(file).Wait();
-            _DeleteAttachment().Wait();
+        public void DeleteAttachement()
+        {
+            try  
+            {
+                 _CreateDocument().Wait();            
+            }
+            catch(Exception ex){
+                throw new Exception($"Error in _CreateDocument with {ex.ToString()}",ex);
+            }
+            string file =null;
+            try
+            {
+                file = RandomTextFile();
+                Assert.True( File.Exists(file));
+            }
+            catch(Exception ex){
+                throw new Exception($"Error in RandomTextFile with {ex.ToString()}",ex);
+            }
+            try{
+                _AddAttachment(file).Wait();
+            }
+            catch(Exception ex){
+                throw new Exception($"Error in _AddAttachment with {ex.ToString()}",ex);
+            }
+            try{
+                _DeleteAttachment().Wait();
+            }
+            catch(Exception ex){
+                throw new Exception($"Error in _DeleteAttachment with {ex.ToString()}",ex);
+            }            
         }
 
         private async Task _DeleteAttachment()
@@ -224,6 +248,10 @@ namespace test
                      return  doc._id == this._id && doc._rev == doc._rev;
                 }
                 return false;
+            }
+            //Override to remove warning
+            public override int GetHashCode(){
+                return 0;
             }
         }
 

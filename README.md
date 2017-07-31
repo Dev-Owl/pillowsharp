@@ -31,7 +31,7 @@ To build the library and to run the unit tests, please follow the instructions b
 
 In case you encounter issues in step 5, please check the CouchSettings.cs file if all configurations are correct for your instance of CouchDB. If you still have issues or questions, please open an issue or contact me.
 
-##Install
+## Install
 Wait until the library is published on the NuGet List or a release is tagged here.
 
 # Work in progress, stay tuned!

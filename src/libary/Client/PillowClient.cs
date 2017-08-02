@@ -28,7 +28,9 @@ namespace PillowSharp.Client
         public const string NewUUID = "_uuids";
         public const string ParamCount = "count";
         public const string AllDocs="_all_docs";
-
+        
+        public const string DesignDoc ="_design";
+        public const string ViewDoc ="_view";
         //Settings
         public PillowClientSettings Settings = new  PillowClientSettings();
 
@@ -311,6 +313,19 @@ namespace PillowSharp.Client
             }
             return result;
         }
+
+        public async Task<CouchDocumentResponse<T>> GetView<T>(string DocumentName,string ViewFunctionName,KeyValuePair<string,object>[] QueryParameter=null,string Database =null) where T:new()
+        {
+            Database = GetDB(typeof(T),Database);
+            return JSONHelper.FromJSON<CouchDocumentResponse<T>>(await RequestHelper.View(Database,DocumentName,ViewFunctionName,QueryParameter,Method.GET,null));
+        }
+
+        public async Task<CouchDocumentResponse<T>> FilterView<T>(string DocumentName,string ViewFunctionName,CouchViewFilter ViewFilter,KeyValuePair<string,object>[] QueryParameter=null,string Database =null) where T:new()
+        {
+            Database = GetDB(typeof(T),Database);
+            return JSONHelper.FromJSON<CouchDocumentResponse<T>>(await RequestHelper.View(Database,DocumentName,ViewFunctionName,QueryParameter,Method.POST,JSONHelper.ToJSON(ViewFilter)));
+        }
+        
 
 #endregion
 

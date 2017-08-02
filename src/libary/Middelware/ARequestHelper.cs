@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using PillowSharp.BaseObject;
+using PillowSharp.CouchType;
 using RestSharp;
 
 namespace PillowSharp.Middelware
@@ -39,6 +40,8 @@ namespace PillowSharp.Middelware
         public abstract Task<IRestResponse> DeleteFile(string ID,string AttachmentName,string Revision,string Database);
 
         public abstract Task<IRestResponse> GetFile(string ID,string AttachmentName,string Revision,string Database);
+
+        public abstract Task<IRestResponse> View(string Database,string DocumentName,string ViewFunctionName,KeyValuePair<string,object>[] QueryParameter,Method HTTPMethod,string Filter);
 
 
     }

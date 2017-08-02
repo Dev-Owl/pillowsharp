@@ -10,6 +10,7 @@ using PillowSharp.Client;
 using System.Collections.Generic;
 using RestSharp.Extensions.MonoHttp;
 using System.IO;
+using PillowSharp.CouchType;
 
 namespace PillowSharp.Middelware.Default 
 {
@@ -44,12 +45,20 @@ namespace PillowSharp.Middelware.Default
                 serverURI = new Uri(Server.GetServerURL());
             }
         }
-        
-        private RestRequest BuildRequestBase(string Resource,Method Method = Method.GET,int TimeOut = 30){
+        private string BuildURL(params string[] URLParts){
+            return string.Join("/",URLParts);
+        }
+        private RestRequest BuildRequestBase(string Resource,Method Method = Method.GET,int TimeOut = 30,KeyValuePair<string,object>[] QueryParameter = null){
             var request = new RestRequest();
             request.Method = Method;
             request.Timeout = TimeOut * 1000;
             request.Resource = Resource;
+            if(QueryParameter != null){
+                foreach(var keyValue in QueryParameter){
+                    if(keyValue.Key != null && keyValue.Value != null)
+                        request.AddQueryParameter(keyValue.Key,keyValue.Value.ToString());
+                }
+            }
             return request;
         }
         private RestRequest AddJSONBody(RestRequest request,string Body){
@@ -143,6 +152,16 @@ namespace PillowSharp.Middelware.Default
             else{
                 client.CookieContainer.Add(serverURI,new Cookie(CoockieName,Value,"/"));
             }
+        }      
+
+        public override Task<IRestResponse> View(string Database, string DocumentName, string ViewFunctionName, KeyValuePair<string, object>[] QueryParameter,Method HTTPMethod,string Filter)
+        {
+            var viewRequest = BuildRequestBase(BuildURL(Database,PillowClient.DesignDoc,DocumentName,PillowClient.ViewDoc,ViewFunctionName),
+                                          QueryParameter:QueryParameter,Method:HTTPMethod);
+            if(!string.IsNullOrEmpty(Filter))
+                AddJSONBody(viewRequest,Filter);
+            return Request(viewRequest);
         }
+
     }
 }

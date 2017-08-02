@@ -7,7 +7,9 @@ namespace PillowSharp.CouchType
 {
     public class CouchLoginResponse:CouchConfirm
     {
-        public string name { get; set; }        
-        public List<string> roles { get; set; }
+        [JsonProperty("name")]
+        public string Name { get; set; }        
+        [JsonProperty("roles")]
+        public List<string> Roles { get; set; }
     }
 }

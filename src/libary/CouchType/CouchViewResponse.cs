@@ -7,10 +7,13 @@ namespace PillowSharp.CouchType
 {
     public class CouchViewResponse<T> 
     {
-        public string id { get; set; }
+        [JsonProperty("id")]
+        public string ID { get; set; }
 
-        public string key { get; set; } 
+        [JsonProperty("key")]
+        public string Key { get; set; } 
 
-        public T value { get; set; } 
+        [JsonProperty("value")]
+        public T Value { get; set; } 
     }
 }

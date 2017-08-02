@@ -17,7 +17,7 @@ namespace PillowSharp.BaseObject
             if(Error == null)
                 return base.ToString();
             
-            return $"Couch error {Error.error}, reason {Error.reason} with HTTP status {Error.HTTPCode}";
+            return $"Couch error {Error.Error}, reason {Error.Reason} with HTTP status {Error.HTTPCode}";
         }
 
     }

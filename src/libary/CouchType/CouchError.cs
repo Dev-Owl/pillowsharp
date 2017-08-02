@@ -9,9 +9,9 @@ namespace PillowSharp.CouchType
     {
         [JsonIgnore]
         public int HTTPCode { get; set; }
-
-        public string error { get; set; }
-
-        public string reason { get; set; } 
+        [JsonProperty("error")]
+        public string Error { get; set; }
+        [JsonProperty("reason")]
+        public string Reason { get; set; } 
     }
 }

@@ -7,6 +7,7 @@ namespace PillowSharp.CouchType
 {
     public class CouchUUIDResponse
     {
-        public List<string> uuids { get; set; }
+        [JsonProperty("uuids")]
+        public List<string> UUIDS { get; set; }
     }
 }

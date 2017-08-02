@@ -1,17 +1,20 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using PillowSharp.Middelware;
 
 namespace PillowSharp.CouchType
 {
     public class CouchDocumentChange : CouchConfirm
     {
-          public string id { get; set; }                   
+          [JsonProperty("id")]
+          public string ID { get; set; }                   
 
-          public string rev {get; set;}
+          [JsonProperty("rev")]
+          public string Rev {get; set;}
 
           public CouchDocument ToCouchDocument(){
-              return new CouchDocument(){_id = this.id,_rev = this.rev,_deleted=false};
+              return new CouchDocument(){ID = this.ID,Rev = this.Rev,Deleted=false};
           }
     }
 }

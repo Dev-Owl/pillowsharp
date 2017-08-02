@@ -7,10 +7,12 @@ namespace PillowSharp.CouchType
 {
     public class CouchViewFilter
     {
-        public List<string> keys { get; set; }
+        [JsonProperty("keys")]
+        public List<string> Keys { get; set; }
+
         public CouchViewFilter(List<string> ViewFilterByID)
         {
-            keys = ViewFilterByID;
+            Keys = ViewFilterByID;
         }
     }
 }

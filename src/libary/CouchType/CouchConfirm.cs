@@ -7,6 +7,7 @@ namespace PillowSharp.CouchType
 {
     public class CouchConfirm
     {
-      public bool ok { get; set; }           
+      [JsonProperty("ok")]
+      public bool Ok { get; set; }           
     }
 }

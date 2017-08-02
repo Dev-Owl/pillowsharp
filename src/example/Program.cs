@@ -57,7 +57,7 @@ namespace test
         public static async Task GetUUIDS(){
             Console.WriteLine("Lets get 10 UUIDS from couch server");
             var uuidResponse = await client.GetUUID(Count:10);
-            foreach(var id in uuidResponse.uuids){
+            foreach(var id in uuidResponse.UUIDS){
                 Console.WriteLine(id);
             }
             Console.WriteLine("Easy as cake");
@@ -80,9 +80,9 @@ namespace test
             Console.WriteLine("Adding document to pillow");
             person = new Person(){Name="Christian",LastName="Muehle",Role="Developer" };
             var result = await client.CreateDocument(person);
-            if(result.ok)
+            if(result.Ok)
             {
-                Console.WriteLine($"Document created with id:{result.id} and rev:{result.rev}");
+                Console.WriteLine($"Document created with id:{result.ID} and Rev:{result.Rev}");
                 person.CouchDocument = result.ToCouchDocument();
             }
         }
@@ -90,7 +90,7 @@ namespace test
         {
             Console.WriteLine("Uploading sleepy owl");
             var result =  await client.AddAttachment(person.CouchDocument,"fav.image","sleepy_owl.JPG");
-            if(result.ok){
+            if(result.Ok){
                 Console.WriteLine("Attachment added");
                 person.CouchDocument = result.ToCouchDocument();
             }
@@ -106,21 +106,21 @@ namespace test
         public static async Task DeleteFileFromDocument()
         {
             var result =  await client.DeleteAttachment(person.CouchDocument,"fav.image");
-            if(result.ok){
+            if(result.Ok){
                  Console.WriteLine($"The file is now deleted");
             }
         }
 
         public static async Task GetDocuments(){
             Console.WriteLine("Get documents from pillow");
-            var result = await client.GetDocument<Person>(person.CouchDocument._id);
+            var result = await client.GetDocument<Person>(person.CouchDocument.ID);
             Console.WriteLine(result.ToString());
         }
         
         public static async Task DeleteDocument(){
             Console.WriteLine("Deleting document from pillow");
             var result = await client.DeleteDocument(person.CouchDocument);
-            if(result.ok){
+            if(result.Ok){
                 Console.WriteLine("Document deleted");
             }
         }

@@ -7,21 +7,22 @@ namespace PillowSharp.CouchType
 {
     public class CouchBulk<T> where T:CouchDocument
     {
-        public List<T> docs { get; set; }
+        [JsonProperty("docs")]
+        public List<T> Docs { get; set; }
 
         public CouchBulk()
         {
-            docs = new List<T>();
+            Docs = new List<T>();
         }
 
         public CouchBulk(T Document)
         {
-            docs = new List<T>(){Document};
+            Docs = new List<T>(){Document};
         }
 
         public CouchBulk(List<T> Documents)
         {
-            docs = Documents;
+            Docs = Documents;
         }
     }
 }

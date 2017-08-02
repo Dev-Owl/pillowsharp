@@ -92,7 +92,7 @@ namespace PillowSharp.Client
                     var loginResponse = JSONHelper.FromJSON<CouchLoginResponse>(response);
                     //thanks to the shared coockie storage all request will now have this coockie active
                     //in case ok store token in storage
-                    if(loginResponse.ok){
+                    if(loginResponse.Ok){
                         //store new token
                         token = response.Cookies.FirstOrDefault(c => c.Name ==CoockieName)?.Value;
                         //Ensure that token exists
@@ -145,12 +145,12 @@ namespace PillowSharp.Client
             //Create the db via a put call
             var result = await RequestHelper.Put(Name);
             //Return response state
-            return FromResponse<CouchConfirm>(result)?.ok ?? false;
+            return FromResponse<CouchConfirm>(result)?.Ok ?? false;
         }
 
         public async Task<bool> DeleteDatbase(string Name)
         {
-            return JSONHelper.FromJSON<CouchConfirm>(await RequestHelper.Delete(Name))?.ok ?? false;
+            return JSONHelper.FromJSON<CouchConfirm>(await RequestHelper.Delete(Name))?.Ok ?? false;
         }
 #endregion
 
@@ -167,24 +167,24 @@ namespace PillowSharp.Client
             {
                 
                 var couchDoc = NewDocument as CouchDocument;
-                if (string.IsNullOrEmpty(couchDoc._id))
+                if (string.IsNullOrEmpty(couchDoc.ID))
                 {
                     if(Settings.AutoGenerateID)
                         if(Settings.UseCouchUUID)
-                            couchDoc._id = (await GetUUID()).uuids[0];
+                            couchDoc.ID = (await GetUUID()).UUIDS[0];
                         else
-                            couchDoc._id = Guid.NewGuid().ToString();
+                            couchDoc.ID = Guid.NewGuid().ToString();
                 }
             }
             //Request and build json for T
             var result = FromResponse<CouchDocumentChange>( await Post(Database,JSONHelper.ToJSON(NewDocument)));
             //If result is ok and the new created entity is based on CouchDocument set values as returned by the server
-            if(result.ok && NewDocument is CouchDocument)
+            if(result.Ok && NewDocument is CouchDocument)
             {
                 var couchDoc = (NewDocument as CouchDocument);
-                couchDoc._id = result.id;
-                couchDoc._rev = result.rev;
-                couchDoc._deleted = false;
+                couchDoc.ID = result.ID;
+                couchDoc.Rev = result.Rev;
+                couchDoc.Deleted = false;
             }
             return result;
         }
@@ -203,11 +203,11 @@ namespace PillowSharp.Client
             //Create token if needed
             await Authenticate();
             //Ensure the document is marked as deleted
-            Documents.ForEach(d => d._deleted=true);
+            Documents.ForEach(d => d.Deleted=true);
             //Use bulk operation to delete the list of documents
             var responseList = FromResponse<List<CouchDocumentChange>>( await Post($"{Database}/{BulkOperation}",JSONHelper.ToJSON(new CouchBulk<T>(Documents)))); //TODO Ugly, rewrite
-            //Update revision numbers for caller
-            responseList.ForEach(response => {if(response.ok) Documents.First(d => d._id == response.id)._rev = response.rev;});
+            //Update Revision numbers for caller
+            responseList.ForEach(response => {if(response.Ok) Documents.First(d => d.ID == response.ID).Rev = response.Rev;});
             return responseList;
         }
 
@@ -222,29 +222,29 @@ namespace PillowSharp.Client
             Database = GetDB(typeof(T), Database);
             //Ensure IDS are created if setting is active
             if(Settings.AutoGenerateID){
-               var missingIDs = Documents.Where(d =>string.IsNullOrEmpty(d._id)).ToList();
+               var missingIDs = Documents.Where(d =>string.IsNullOrEmpty(d.ID)).ToList();
                if(missingIDs.Count > 0){
                     List<string> ids = null; 
                     //Swith between CouchID and GUID 
                     if(Settings.UseCouchUUID)
-                        ids = (await GetUUID(missingIDs.Count)).uuids;
+                        ids = (await GetUUID(missingIDs.Count)).UUIDS;
                     else
                         ids = GetGUID(missingIDs.Count);
                     for(var i=0;i < missingIDs.Count;++i)
                     {
-                        missingIDs[i]._id = ids[i];
+                        missingIDs[i].ID = ids[i];
                     }
                }
                
             }
             //Use bulk to update list of documents in given db
             var result = FromResponse<List<CouchDocumentChange>>( await Post($"{Database}/{BulkOperation}",JSONHelper.ToJSON(new CouchBulk<T>(Documents)))); //TODO Ugly, rewrite
-            //Set new revisions
-            result.Where(cc => cc.ok).ToList().ForEach(cc => 
+            //Set new Revisions
+            result.Where(cc => cc.Ok).ToList().ForEach(cc => 
                 {
-                    var current_doc = Documents.FirstOrDefault(d => d._id == cc.id);
+                    var current_doc = Documents.FirstOrDefault(d => d.ID == cc.ID);
                     if(current_doc != null)
-                        current_doc._rev = cc.rev;
+                        current_doc.Rev = cc.Rev;
                 }
             );
            
@@ -262,7 +262,7 @@ namespace PillowSharp.Client
            return FromResponse<CouchDocumentResponse<T>>(result);
         }
 
-        //Get a single document, optional with rev number
+        //Get a single document, optional with Rev number
         public async Task<T> GetDocument<T>(string ID,string Revision=null,string Database=null) where T : new()
         {
             //Document == null -> check if entity has meta 
@@ -285,9 +285,9 @@ namespace PillowSharp.Client
             if(!System.IO.File.Exists(File))
                 throw new PillowException($"Unable to find file {File}!");
             Database = GetDB(typeof(T),Database);
-            var result = JSONHelper.FromJSON<CouchDocumentChange>( await RequestHelper.UploadFile(Document._id,AttributeName,Document._rev,Database,File));
-            if(result.ok){
-                Document._rev = result.rev; // Update revision number for caller
+            var result = JSONHelper.FromJSON<CouchDocumentChange>( await RequestHelper.UploadFile(Document.ID,AttributeName,Document.Rev,Database,File));
+            if(result.Ok){
+                Document.Rev = result.Rev; // Update Revision number for caller
             }
             return result;
         }
@@ -296,7 +296,7 @@ namespace PillowSharp.Client
         {
             Database = GetDB(typeof(T),Database);
             //Ask for file data
-            var response = await RequestHelper.GetFile(Document._id,AttributeName,Document._rev,Database);
+            var response = await RequestHelper.GetFile(Document.ID,AttributeName,Document.Rev,Database);
             //In case something went wrong throw an error
             if(response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created)
                 PillowErrorHelper.HandleNoneOKResponse(response,JSONHelper);
@@ -307,9 +307,9 @@ namespace PillowSharp.Client
         public async Task<CouchDocumentChange> DeleteAttachment<T>(T Document,string AttributeName,string Database=null) where T : CouchDocument
         {
             Database = GetDB(typeof(T),Database);
-            var result = JSONHelper.FromJSON<CouchDocumentChange>( await RequestHelper.DeleteFile(Document._id,AttributeName,Document._rev,Database));
-            if(result.ok){
-                Document._rev = result.rev;
+            var result = JSONHelper.FromJSON<CouchDocumentChange>( await RequestHelper.DeleteFile(Document.ID,AttributeName,Document.Rev,Database));
+            if(result.Ok){
+                Document.Rev = result.Rev;
             }
             return result;
         }

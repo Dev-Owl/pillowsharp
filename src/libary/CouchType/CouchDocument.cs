@@ -7,10 +7,13 @@ namespace PillowSharp.CouchType
 {
     public class CouchDocument
     {
-        public string _id { get; set; }  = null;
+        [JsonProperty("_id")]
+        public string ID { get; set; }  = null;
 
-        public string _rev { get; set; } = null;
+        [JsonProperty("_rev")]
+        public string Rev { get; set; } = null;
 
-        public bool _deleted { get; set; } = false;
+        [JsonProperty("_deleted")]
+        public bool Deleted { get; set; } = false;
     }
 }

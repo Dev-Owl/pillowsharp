@@ -24,9 +24,9 @@ namespace PillowSharp.Helper
             else{
                 
                 error = new CouchError(){
-                    error = "Generic",
+                    Error = "Generic",
                     HTTPCode = (int)Response.StatusCode,
-                    reason ="Error, see status code"
+                    Reason ="Error, see status code"
                 };
             }
             throw new CouchException(error);

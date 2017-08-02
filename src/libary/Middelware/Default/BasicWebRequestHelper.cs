@@ -156,7 +156,7 @@ namespace PillowSharp.Middelware.Default
 
         public override Task<IRestResponse> View(string Database, string DocumentName, string ViewFunctionName, KeyValuePair<string, object>[] QueryParameter,Method HTTPMethod,string Filter)
         {
-            var viewRequest = BuildRequestBase(BuildURL(Database,PillowClient.DesignDoc,DocumentName,PillowClient.ViewDoc,ViewFunctionName),
+            var viewRequest = BuildRequestBase(BuildURL(Database,CouchEntryPoints.DesignDoc,DocumentName,CouchEntryPoints.ViewDoc,ViewFunctionName),
                                           QueryParameter:QueryParameter,Method:HTTPMethod);
             if(!string.IsNullOrEmpty(Filter))
                 AddJSONBody(viewRequest,Filter);

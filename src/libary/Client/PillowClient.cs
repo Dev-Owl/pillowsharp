@@ -19,18 +19,6 @@ namespace PillowSharp.Client
 {
     public class PillowClient
     {
-        //TODO If list grows move to seperated class to reduce size here
-        //List of defined entry points in couchDB
-        public const string AllDBQuery = "_all_dbs";
-        public const string BulkOperation = "_bulk_docs";
-        public const string Session = "_session";
-        public const string CoockieName = "AuthSession";
-        public const string NewUUID = "_uuids";
-        public const string ParamCount = "count";
-        public const string AllDocs="_all_docs";
-        
-        public const string DesignDoc ="_design";
-        public const string ViewDoc ="_view";
         //Settings
         public PillowClientSettings Settings = new  PillowClientSettings();
 
@@ -87,14 +75,14 @@ namespace PillowSharp.Client
                 var token = tokenStorage.Get(loginData.UserName);
                 if(string.IsNullOrEmpty( token)){
                     //new token is required post to server
-                    var response = await RequestHelper.Post(Session,JSONHelper.ToJSON(loginData));
+                    var response = await RequestHelper.Post(CouchEntryPoints.Session,JSONHelper.ToJSON(loginData));
                     //parese server response
                     var loginResponse = JSONHelper.FromJSON<CouchLoginResponse>(response);
                     //thanks to the shared coockie storage all request will now have this coockie active
                     //in case ok store token in storage
                     if(loginResponse.Ok){
                         //store new token
-                        token = response.Cookies.FirstOrDefault(c => c.Name ==CoockieName)?.Value;
+                        token = response.Cookies.FirstOrDefault(c => c.Name == CouchEntryPoints.CoockieName)?.Value;
                         //Ensure that token exists
                         if(!string.IsNullOrEmpty(token))
                             tokenStorage.Add(loginData.UserName,token);
@@ -107,7 +95,7 @@ namespace PillowSharp.Client
                 }
                 else{
                     //Ensure that coockie is set for all requests, can be a new instance not yet made a call
-                    RequestHelper.SetCoockie(CoockieName,token);
+                    RequestHelper.SetCoockie(CouchEntryPoints.CoockieName,token);
                 }
             }
         }
@@ -116,7 +104,7 @@ namespace PillowSharp.Client
         public async Task<CouchUUIDResponse> GetUUID(int Count=1)
         {
             //Make the request and return the list of IDS 
-            return JSONHelper.FromJSON<CouchUUIDResponse>( await RequestHelper.Get(NewUUID,new KeyValuePair<string, object>(ParamCount,Count)));
+            return JSONHelper.FromJSON<CouchUUIDResponse>( await RequestHelper.Get(CouchEntryPoints.NewUUID,new KeyValuePair<string, object>(CouchEntryPoints.ParamCount,Count)));
         }
        
         //Check if a db exists in the current server
@@ -132,7 +120,7 @@ namespace PillowSharp.Client
             //Create token if needed
             await Authenticate();
             //Make the request to get the list of db
-            var result = await RequestHelper.Get(AllDBQuery);
+            var result = await RequestHelper.Get(CouchEntryPoints.AllDBQuery);
             //return result
             return FromResponse<List<string>>(result);
         }
@@ -205,7 +193,7 @@ namespace PillowSharp.Client
             //Ensure the document is marked as deleted
             Documents.ForEach(d => d.Deleted=true);
             //Use bulk operation to delete the list of documents
-            var responseList = FromResponse<List<CouchDocumentChange>>( await Post($"{Database}/{BulkOperation}",JSONHelper.ToJSON(new CouchBulk<T>(Documents)))); //TODO Ugly, rewrite
+            var responseList = FromResponse<List<CouchDocumentChange>>( await Post($"{Database}/{CouchEntryPoints.BulkOperation}",JSONHelper.ToJSON(new CouchBulk<T>(Documents)))); //TODO Ugly, rewrite
             //Update Revision numbers for caller
             responseList.ForEach(response => {if(response.Ok) Documents.First(d => d.ID == response.ID).Rev = response.Rev;});
             return responseList;
@@ -238,7 +226,7 @@ namespace PillowSharp.Client
                
             }
             //Use bulk to update list of documents in given db
-            var result = FromResponse<List<CouchDocumentChange>>( await Post($"{Database}/{BulkOperation}",JSONHelper.ToJSON(new CouchBulk<T>(Documents)))); //TODO Ugly, rewrite
+            var result = FromResponse<List<CouchDocumentChange>>( await Post($"{Database}/{CouchEntryPoints.BulkOperation}",JSONHelper.ToJSON(new CouchBulk<T>(Documents)))); //TODO Ugly, rewrite
             //Set new Revisions
             result.Where(cc => cc.Ok).ToList().ForEach(cc => 
                 {
@@ -277,7 +265,7 @@ namespace PillowSharp.Client
         public async Task<CouchDocumentResponse<CouchViewResponse<AllDocResponse>>> GetAllDocuments(Type Document = null,string Database=null) 
         {
             Database = GetDB(Document,Database); // Get database to use
-            return JSONHelper.FromJSON<CouchDocumentResponse<CouchViewResponse<AllDocResponse>>>( await RequestHelper.Get($"{Database}/{AllDocs}")); //return result to client
+            return JSONHelper.FromJSON<CouchDocumentResponse<CouchViewResponse<AllDocResponse>>>( await RequestHelper.Get($"{Database}/{CouchEntryPoints.AllDocs}")); //return result to client
         }
         //TODO add a function that allows to pass a stream and mime type to use
         public async Task<CouchDocumentChange> AddAttachment<T>(T Document,string AttributeName,string File,string Database=null) where T : CouchDocument

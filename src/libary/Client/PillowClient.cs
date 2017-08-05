@@ -314,6 +314,26 @@ namespace PillowSharp.Client
             return JSONHelper.FromJSON<CouchDocumentResponse<T>>(await RequestHelper.View(Database,DocumentName,ViewFunctionName,QueryParameter,Method.POST,JSONHelper.ToJSON(ViewFilter)));
         }
         
+        public async Task<CouchDesignDocument> GetDesignDocument(string DocumentID, string Database=null)
+        {
+            Database = GetDB(null,Database);                                        //TODO No URL building, add helper function in RequestHelper
+            return JSONHelper.FromJSON<CouchDesignDocument>(await RequestHelper.Get($"{Database}/{CouchEntryPoints.DesignDoc}/{DocumentID}"));
+        }
+
+        public async Task<CouchDocumentChange> UpsertDesignDocument(CouchDesignDocument DesignDocument,string Database =null)
+        {
+             Database = GetDB(DesignDocument.GetType(),Database);  
+             if (string.IsNullOrEmpty(DesignDocument.ID))
+             {
+                 if(Settings.AutoGenerateID)
+                     if(Settings.UseCouchUUID)
+                         DesignDocument.ID = (await GetUUID()).UUIDS[0];
+                     else
+                         DesignDocument.ID = Guid.NewGuid().ToString();
+             }                                                                          //TODO No URL building, add helper function in RequestHelper
+             return JSONHelper.FromJSON<CouchDocumentChange>( await RequestHelper.Put($"{Database}/{CouchEntryPoints.DesignDoc}/{DesignDocument.ID}",JSONHelper.ToJSON(DesignDocument)));
+        }
+
 
 #endregion
 

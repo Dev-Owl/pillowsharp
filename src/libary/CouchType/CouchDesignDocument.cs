@@ -28,21 +28,33 @@ namespace PillowSharp.CouchType
         public Dictionary<string,string> Updates {get;set;}
 
 
+        public CouchDesignDocument(string Language ="javascript")
+        {
+          Init(Language);
+        }
+
         public CouchDesignDocument()
+        {
+            Init();
+        }
+
+        private void Init(string Language ="javascript")
         {
             Views   = new Dictionary<string,CouchView>();
             Shows   = new Dictionary<string, string>();
             Filters = new Dictionary<string, string>();
             Lists   = new Dictionary<string, string>();
             Updates = new Dictionary<string, string>();
+            this.Language = Language;
         }
+
         private void EnsureExists<TValue>(Dictionary<string,TValue> Dictionary,string Key,TValue Value = default(TValue)) 
         {
             if(!Dictionary.ContainsKey(Key))
                 Dictionary.Add(Key,Value);
         }
 
-        public void AddView(string Name,string Map, string Reduce)
+        public void AddView(string Name,string Map, string Reduce=null)
         {  
             EnsureExists(Views,Name,new CouchView());
             var view = Views[Name];

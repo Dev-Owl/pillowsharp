@@ -26,16 +26,22 @@ namespace test
           _CreateDocument().Wait();
         }
 
-        private async Task _CreateDocument(){
-            
+        public static async Task<TestDocument> CreateTestDocument(string Database)
+        {
             var testDoc = new TestDocument();
             PillowClient client = CouchSettings.GetTestClient();
-            var result = await client.CreateDocument(testDoc); 
+            var result = await client.CreateDocument(testDoc,Database:Database); 
             //Ensure all needed parts are set by the client
             Assert.True(result.Ok,"Error during document creation");
             Assert.False(string.IsNullOrEmpty( testDoc.ID ),"ID was not set for new document");
             Assert.False(string.IsNullOrEmpty( testDoc.Rev ),"Rev was not set for new document");
-            LastDocument = testDoc;
+            return testDoc;
+        }
+
+        
+
+        private async Task _CreateDocument(string Database=null){
+           LastDocument =await CreateTestDocument(Database);
         }
         [Fact]
         public void GetDocument(){
@@ -216,52 +222,6 @@ namespace test
             CouchSettings.GetTestClient().DeleteDatbase(DBName).Wait();
         }
 
-        [DBName(DocumentTests.DBName)]
-        public class TestDocument : CouchDocument{
-            public int IntProp { get; set; }
-            public string StringProp { get; set; }
-
-            public List<string> ListProp { get; set; }
-
-            public TestDocumentSmall SubObj { get; set; }
-
-            public List<TestDocumentSmall> SubObjList { get; set; }
-
-            public TestDocument()
-            {   
-                IntProp = new Random().Next(1,23456789);
-                StringProp ="This are not the droids you are loOking for";
-                ListProp = new  List<string>(){"a","b","1337"};
-                SubObj = new TestDocumentSmall();
-                SubObjList = new List<TestDocumentSmall>() {new TestDocumentSmall(),new TestDocumentSmall()};
-            }
-
-            public bool AllSet()
-            {
-                return IntProp > 0 && !string.IsNullOrEmpty(StringProp) && ListProp.Count > 0 && SubObj != null && SubObjList.Count >0 && !SubObjList.Any(o => o == null);
-
-            }
-
-            public override bool Equals(object obj){
-                if(obj is TestDocument){
-                    var doc = obj as TestDocument;
-                     return  doc.ID == this.ID && doc.Rev == doc.Rev;
-                }
-                return false;
-            }
-            //Override to remove warning
-            public override int GetHashCode(){
-                return 0;
-            }
-        }
-
-        public class TestDocumentSmall{
-            public string TestProp { get; set; }
-
-            public TestDocumentSmall()
-            {
-                TestProp ="FuBar";
-            }
-        }
+      
     }
 }

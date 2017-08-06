@@ -302,22 +302,29 @@ namespace PillowSharp.Client
             return result;
         }
 
-        public async Task<CouchDocumentResponse<T>> GetView<T>(string DocumentName,string ViewFunctionName,KeyValuePair<string,object>[] QueryParameter=null,string Database =null) where T:new()
+        public async Task<CouchDocumentResponse<T>> GetView<T>(string DocumentID,string ViewFunctionName,KeyValuePair<string,object>[] QueryParameter=null,string Database =null) where T:new()
         {
             Database = GetDB(typeof(T),Database);
-            return JSONHelper.FromJSON<CouchDocumentResponse<T>>(await RequestHelper.View(Database,DocumentName,ViewFunctionName,QueryParameter,Method.GET,null));
+            if(!DocumentID.StartsWith(CouchEntryPoints.DesignDoc)) 
+                DocumentID = $"{CouchEntryPoints.DesignDoc}/{DocumentID}";
+            return JSONHelper.FromJSON<CouchDocumentResponse<T>>(await RequestHelper.View(Database,DocumentID,ViewFunctionName,QueryParameter,Method.GET,null));
         }
 
-        public async Task<CouchDocumentResponse<T>> FilterView<T>(string DocumentName,string ViewFunctionName,CouchViewFilter ViewFilter,KeyValuePair<string,object>[] QueryParameter=null,string Database =null) where T:new()
+        public async Task<CouchDocumentResponse<T>> FilterView<T>(string DocumentID,string ViewFunctionName,CouchViewFilter ViewFilter,KeyValuePair<string,object>[] QueryParameter=null,string Database =null) where T:new()
         {
             Database = GetDB(typeof(T),Database);
-            return JSONHelper.FromJSON<CouchDocumentResponse<T>>(await RequestHelper.View(Database,DocumentName,ViewFunctionName,QueryParameter,Method.POST,JSONHelper.ToJSON(ViewFilter)));
+            if(!DocumentID.StartsWith(CouchEntryPoints.DesignDoc)) 
+                DocumentID = $"{CouchEntryPoints.DesignDoc}/{DocumentID}";
+            return JSONHelper.FromJSON<CouchDocumentResponse<T>>(await RequestHelper.View(Database,DocumentID,ViewFunctionName,QueryParameter,Method.POST,JSONHelper.ToJSON(ViewFilter)));
         }
         
         public async Task<CouchDesignDocument> GetDesignDocument(string DocumentID, string Database=null)
         {
-            Database = GetDB(null,Database);                                        //TODO No URL building, add helper function in RequestHelper
-            return JSONHelper.FromJSON<CouchDesignDocument>(await RequestHelper.Get($"{Database}/{CouchEntryPoints.DesignDoc}/{DocumentID}"));
+            Database = GetDB(null,Database);           
+             if(!DocumentID.StartsWith(CouchEntryPoints.DesignDoc)) 
+                DocumentID = $"{CouchEntryPoints.DesignDoc}/{DocumentID}";
+                                         //TODO No URL building, add helper function in RequestHelper
+            return JSONHelper.FromJSON<CouchDesignDocument>(await RequestHelper.Get($"{Database}/{DocumentID}"));
         }
 
         public async Task<CouchDocumentChange> UpsertDesignDocument(CouchDesignDocument DesignDocument,string Database =null)
@@ -330,8 +337,17 @@ namespace PillowSharp.Client
                          DesignDocument.ID = (await GetUUID()).UUIDS[0];
                      else
                          DesignDocument.ID = Guid.NewGuid().ToString();
-             }                                                                          //TODO No URL building, add helper function in RequestHelper
-             return JSONHelper.FromJSON<CouchDocumentChange>( await RequestHelper.Put($"{Database}/{CouchEntryPoints.DesignDoc}/{DesignDocument.ID}",JSONHelper.ToJSON(DesignDocument)));
+             }       
+             if(!DesignDocument.ID.StartsWith(CouchEntryPoints.DesignDoc)) 
+                DesignDocument.ID = $"{CouchEntryPoints.DesignDoc}/{DesignDocument.ID}";
+                                                                               //TODO No URL building, add helper function in RequestHelper
+             var result = JSONHelper.FromJSON<CouchDocumentChange>( await RequestHelper.Put($"{Database}/{DesignDocument.ID}",JSONHelper.ToJSON(DesignDocument)));
+             if(result.Ok)
+             {
+                DesignDocument.ID = result.ID;
+                DesignDocument.Rev = result.Rev;
+             }
+             return result;
         }
 
 

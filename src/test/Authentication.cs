@@ -18,17 +18,21 @@ namespace test
         [InlineData(ELoginTypes.TokenLogin)]
         public void CreateDBBothAuth(ELoginTypes Type)
         {
-            LoginCreateDB("admin","admin",Type).Wait();
+            if(!CouchSettings.SkipAuthTests)
+                LoginCreateDB(Type).Wait();
         }
 
         public void Dispose()
         {
-            var client = CouchSettings.GetTestClient();
-            client.DeleteDatbase(DBName).Wait();
+            if(!CouchSettings.SkipAuthTests)
+            {
+                var client = CouchSettings.GetTestClient();
+                client.DeleteDatbase(DBName).Wait();
+            }
         }
 
-        private async Task LoginCreateDB(string User,string Password,ELoginTypes Type){
-            var client = new PillowClient(new BasicCouchDBServer("http://127.0.0.1:5984",new CouchLoginData(User,Password),Type));
+        private async Task LoginCreateDB(ELoginTypes Type){
+            var client =  CouchSettings.GetTestClient(LoginType: Type);
             var result = await client.CreateDatabase(DBName);
             Assert.True(result,$"Unable to create the db, with {Type.ToString("G")}");
         }   

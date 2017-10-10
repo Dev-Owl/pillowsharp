@@ -11,7 +11,7 @@ namespace PillowSharp.Middelware.Default
 
         private string _serverURL = null;
 
-        public ELoginTypes LoginType {get{return _loginType;}}
+        public ELoginTypes LoginType { get { return _loginType; } set { _loginType = value; } }
 
         public BasicCouchDBServer(string ServerURL,CouchLoginData LoginData = null,ELoginTypes LoginType = ELoginTypes.None)
         {

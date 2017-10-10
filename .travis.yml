@@ -4,7 +4,7 @@ branches:
     - master
 solution: pillowsharp.csproj
 mono: none
-dotnet: 1.0.4
+dotnet: 2.0.0
 services:
   - couchdb
 before_script:

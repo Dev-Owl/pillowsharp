@@ -29,6 +29,8 @@ To build the library and to run the unit tests, please follow the instructions b
 5. Switch into the cloned folder and execute build.bat (Windows) or build.sh
 6. After the script is completed, you are ready to use the `library/nuget`
 
+**Please note:** If you are using CouchDB 2.X there are some changes to the configure a development enviorment you can use the dev_couch2_setup.sh/bat file. It will configure a single node instance with the default admin used also in the unit tests.
+
 In case you encounter issues in step 5, please check the CouchSettings.cs file if all configurations are correct for your instance of CouchDB. If you still have issues or questions, please open an issue or contact me.
 
 ## Install

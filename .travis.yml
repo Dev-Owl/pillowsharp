@@ -7,8 +7,8 @@ mono: none
 dotnet: 2.0.0
 services:
   - couchdb
-before_script: #CouchDB2 changed the port from 5984 to 5986
-  -  curl -X PUT localhost:5986/_config/admins/admin -d '"admin"'
+before_script: 
+  -  curl -X PUT localhost:5984/_config/admins/admin -d '"admin"'
 script: 
   - ./src/build.sh
 branches:  

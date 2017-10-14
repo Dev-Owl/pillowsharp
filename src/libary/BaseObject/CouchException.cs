@@ -11,6 +11,8 @@ namespace PillowSharp.BaseObject
         public CouchException(CouchError Error)
         {
             this.Error = Error;
+            if (Error != null)
+                Console.WriteLine(this.ToString());
         }
 
         public override string ToString(){

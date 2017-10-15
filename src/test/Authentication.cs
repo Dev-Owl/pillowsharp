@@ -8,17 +8,19 @@ using System.Threading.Tasks;
 
 namespace test
 {
-    public class AuthenticationDBCreationTests : IDisposable
+    public class AuthenticationDBCreationTests : BaseTest,IDisposable
     {
-        public const string DBName = "pillowtest_auth";
-
+        public AuthenticationDBCreationTests() : base("authentication_test")
+        {
+        }
 
         [Theory]
         [InlineData(ELoginTypes.BasicAuth)]
         [InlineData(ELoginTypes.TokenLogin)]
         public void CreateDBBothAuth(ELoginTypes Type)
         {
-            if(!CouchSettings.SkipAuthTests)
+           
+            if (!CouchSettings.SkipAuthTests)
                 LoginCreateDB(Type).Wait();
         }
 
@@ -26,14 +28,14 @@ namespace test
         {
             if(!CouchSettings.SkipAuthTests)
             {
-                var client = CouchSettings.GetTestClient();
-                client.DeleteDatbase(DBName).Wait();
+                var client = GetTestClient();
+                client.DeleteDatbase(this.TestDB).Wait();
             }
         }
 
         private async Task LoginCreateDB(ELoginTypes Type){
-            var client =  CouchSettings.GetTestClient(LoginType: Type);
-            var result = await client.CreateDatabase(DBName);
+            var client = GetTestClient(Type);
+            var result = await client.CreateDatabase(this.TestDB);
             Assert.True(result,$"Unable to create the db, with {Type.ToString("G")}");
         }   
 

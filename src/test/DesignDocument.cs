@@ -11,15 +11,15 @@ using System.Linq;
 using System.IO;
 namespace test
 {
-    public class DesignDocumentTests : IDisposable
+    public class DesignDocumentTests : BaseTest, IDisposable
     {
-        public const string DBName = "pillowtest_designdoc";
+       
         public TestDocument LastDocument { get; set; }
         public CouchDesignDocument LastDesignDoc {get;set;}
 
-        public DesignDocumentTests()
+        public DesignDocumentTests():base("pillowtest_designdoc")
         {
-            CouchSettings.GetTestClient().CreateDatabase(DBName).Wait();
+            GetTestClient().CreateDatabase(this.TestDB).Wait();
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace test
 
         private async Task _CreateDesign()
         {
-            var client = CouchSettings.GetTestClient(DBName);
+            var client = GetTestClient();
             //Create document with two views
             var designDoc = new CouchDesignDocument();
             designDoc.ID="testDesignDoc";
@@ -52,7 +52,7 @@ namespace test
         {
             await _CreateDesign();
             Assert.True(LastDesignDoc != null,"No document created during CreateDesign");
-            var client = CouchSettings.GetTestClient(DBName);
+            var client = GetTestClient();
             var dbDocument = await client.GetDesignDocument(LastDesignDoc.ID);
             Assert.True(dbDocument != null,"Unable to get design from DB");
             Assert.True(dbDocument.ID == LastDesignDoc.ID,"ID is different as expected!");
@@ -76,8 +76,8 @@ namespace test
         }
         public async Task _RunViewDesign(){
             await _CreateDesign();
-            var testDoc = await DocumentTests.CreateTestDocument(DBName);//create a doc in design test db            
-            var client = CouchSettings.GetTestClient(DBName);
+            var testDoc = await DocumentTests.CreateTestDocument(this.TestDB);//create a doc in design test db            
+            var client = GetTestClient();
             var result = await client.GetView<dynamic>(LastDesignDoc.ID,"test",new[] {new KeyValuePair<string, object>("reduce","false")});
             Assert.True(result != null,"Result was null, expected data");
             //TODO extend this test
@@ -91,7 +91,7 @@ namespace test
 
         public void Dispose()
         {
-            CouchSettings.GetTestClient().DeleteDatbase(DBName).Wait();
+            GetTestClient().DeleteDatbase(this.TestDB).Wait();
         }
     }
 }

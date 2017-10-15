@@ -11,8 +11,6 @@ using System.Linq;
 using System.IO;
 namespace test
 {
-        
-        [DBName(DocumentTests.DBName)]
         public class TestDocument : CouchDocument{
             public int IntProp { get; set; }
             public string StringProp { get; set; }

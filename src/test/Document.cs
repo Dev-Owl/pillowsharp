@@ -11,15 +11,16 @@ using System.Linq;
 using System.IO;
 namespace test
 {
-    public class DocumentTests : IDisposable
+    public class DocumentTests : BaseTest, IDisposable
     {
-        public const string DBName = "pillowtest_doc";
+        
         public TestDocument LastDocument { get; set; }
 
-        public DocumentTests()
+        public DocumentTests():base("pillowtest_doc")
         {
-            CouchSettings.GetTestClient().CreateDatabase(DBName).Wait();
+            GetTestClient().CreateDatabase(this.TestDB).Wait();
         }
+
         [Fact]
         public void CreateDocument()
         {
@@ -29,7 +30,7 @@ namespace test
         public static async Task<TestDocument> CreateTestDocument(string Database)
         {
             var testDoc = new TestDocument();
-            PillowClient client = CouchSettings.GetTestClient();
+            var client = CouchSettings.GetTestClient(Database);
             var result = await client.CreateDocument(testDoc,Database:Database); 
             //Ensure all needed parts are set by the client
             Assert.True(result.Ok,"Error during document creation");
@@ -40,8 +41,8 @@ namespace test
 
         
 
-        private async Task _CreateDocument(string Database=null){
-           LastDocument =await CreateTestDocument(Database);
+        private async Task _CreateDocument(){
+           LastDocument =await CreateTestDocument(this.TestDB);
         }
         [Fact]
         public void GetDocument(){
@@ -52,8 +53,8 @@ namespace test
         private async Task _GetDocument()
         {
             //get all
-            PillowClient client = CouchSettings.GetTestClient();
-            var result = await client.GetAllDocuments(Database:DBName);
+            PillowClient client = GetTestClient();
+            var result = await client.GetAllDocuments(Database: this.TestDB);
             Assert.True(result !=null,"No result from couch db");
             Assert.True(result.TotalRows > 0,"No documents returned, expected >=1");
             Assert.True(result.Rows?.Count == result.TotalRows,"Total rows where not equal returned rows!");
@@ -78,7 +79,7 @@ namespace test
         }
 
         private async Task Deletedocument(){
-            var client = CouchSettings.GetTestClient();
+            var client = GetTestClient();
             var prevRevision = LastDocument.Rev;
             var result = await client.DeleteDocument<TestDocument>(LastDocument);
             Assert.NotNull(result);
@@ -93,7 +94,7 @@ namespace test
         }
 
         private async Task _UpdateDocument(){
-            var client = CouchSettings.GetTestClient();
+            var client = GetTestClient();
             var prevText = LastDocument.StringProp;
             var lastRev = LastDocument.Rev;
             LastDocument.StringProp ="Luke, I'm your father!";
@@ -112,8 +113,8 @@ namespace test
         }
 
          private async Task _UpdateDocuments(){
-            var client = CouchSettings.GetTestClient();
-            
+            var client = GetTestClient();
+
             var prevText = LastDocument.StringProp;
             var lastRev = LastDocument.Rev;
             LastDocument.StringProp ="Luke, I'm your father!";
@@ -141,7 +142,7 @@ namespace test
             _AddAttachment(file).Wait();
         }
         private async Task _AddAttachment(string File){
-            var client = CouchSettings.GetTestClient();
+            var client = GetTestClient();
             var result =  await client.AddAttachment(LastDocument,File,"test.txt");
             Assert.True(result.Ok,"Add attachment failed");
             Assert.True(result.Rev == LastDocument.Rev,"Revision was not updated");
@@ -171,7 +172,7 @@ namespace test
         private async Task _GetAttachment(string FilePath)
         {
             var expectedSize = File.ReadAllBytes(FilePath);
-            var client = CouchSettings.GetTestClient();
+            var client = GetTestClient();
             var result =  await client.GetAttachement(LastDocument,"test.txt");
             Assert.True(expectedSize.Count() == result.Count(),"File size is different");
         }
@@ -211,15 +212,15 @@ namespace test
 
         private async Task _DeleteAttachment()
         {
-             var client = CouchSettings.GetTestClient();
-             var result = await client.DeleteAttachment(LastDocument,"test.txt");
+             var client = GetTestClient();
+            var result = await client.DeleteAttachment(LastDocument,"test.txt");
              Assert.True(result.Ok,"Returned result was not true");
              Assert.True(result.Rev == LastDocument.Rev,"Revision was not updated as expected");
         }
 
         public void Dispose()
         {
-            CouchSettings.GetTestClient().DeleteDatbase(DBName).Wait();
+            GetTestClient().DeleteDatbase(this.TestDB).Wait();
         }
 
       

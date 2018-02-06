@@ -8,9 +8,9 @@ using PillowSharp.Helper;
 using System.Linq;
 using PillowSharp.Client;
 using System.Collections.Generic;
-using RestSharp.Extensions.MonoHttp;
 using System.IO;
 using PillowSharp.CouchType;
+using System.Web;
 
 namespace PillowSharp.Middelware.Default 
 {

@@ -25,11 +25,11 @@ namespace PillowSharp.Client
         {
             get
             {
-                return ServerConfiguration;
+                return serverConfiguration;
             }
             set
             {
-                ServerConfiguration = value;
+                serverConfiguration = value;
                 RequestHelper?.UpdateServerData(value);
             }
         }

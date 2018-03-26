@@ -18,7 +18,7 @@ namespace test
 
         public DocumentTests():base("pillowtest_doc")
         {
-            GetTestClient().CreateDatabase(this.TestDB).Wait();
+            GetTestClient().CreateNewDatabase(this.TestDB).Wait();
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace test
         {
             var testDoc = new TestDocument();
             var client = CouchSettings.GetTestClient(Database);
-            var result = await client.CreateDocument(testDoc,Database:Database); 
+            var result = await client.CreateANewDocument(testDoc,DatabaseToCreateDocumentIn:Database); 
             //Ensure all needed parts are set by the client
             Assert.True(result.Ok,"Error during document creation");
             Assert.False(string.IsNullOrEmpty( testDoc.ID ),"ID was not set for new document");
@@ -54,7 +54,7 @@ namespace test
         {
             //get all
             PillowClient client = GetTestClient();
-            var result = await client.GetAllDocuments(Database: this.TestDB);
+            var result = await client.GetAllDocuments(DatabaseToUse: this.TestDB);
             Assert.True(result !=null,"No result from couch db");
             Assert.True(result.TotalRows > 0,"No documents returned, expected >=1");
             Assert.True(result.Rows?.Count == result.TotalRows,"Total rows where not equal returned rows!");
@@ -120,8 +120,8 @@ namespace test
             LastDocument.StringProp ="Luke, I'm your father!";
             
             var documentList = new List<TestDocument>(){new TestDocument(),new TestDocument(),LastDocument};
-            var result = await client.UpdateDocument(documentList);
-            Assert.True(result.Count == documentList.Count,"Result list was not the same length as document list");
+            var result = await client.UpdateDocuments(documentList);
+            Assert.True(result.Count() == documentList.Count,"Result list was not the same length as document list");
             Assert.True(documentList.All(d => !string.IsNullOrEmpty(d.ID)),"Not all IDs where set as expected");
             Assert.True(documentList.All(d => !string.IsNullOrEmpty(d.Rev)),"Not all revs where set as expected");
             Assert.True(result.All(r => r.Ok),"Update document returned false for at least one document");

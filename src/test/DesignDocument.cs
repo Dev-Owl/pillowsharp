@@ -19,7 +19,7 @@ namespace test
 
         public DesignDocumentTests():base("pillowtest_designdoc")
         {
-            GetTestClient().CreateDatabase(this.TestDB).Wait();
+            GetTestClient().CreateNewDatabase(this.TestDB).Wait();
         }
 
         [Fact]

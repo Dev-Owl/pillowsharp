@@ -35,7 +35,7 @@ namespace test
 
         private async Task LoginCreateDB(ELoginTypes Type){
             var client = GetTestClient(Type);
-            var result = await client.CreateDatabase(this.TestDB);
+            var result = await client.CreateNewDatabase(this.TestDB);
             Assert.True(result,$"Unable to create the db, with {Type.ToString("G")}");
         }   
 

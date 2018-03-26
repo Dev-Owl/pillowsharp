@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using PillowSharp.BaseObject;
 using PillowSharp.CouchType;
 using RestSharp;
+using System.Linq;
 
 namespace PillowSharp.Middelware
 {
@@ -15,6 +17,7 @@ namespace PillowSharp.Middelware
         public const string Rev ="rev";
 
         internal ICouchdbServer _server = null;
+
         public AWebRequestHelper(ICouchdbServer Server)
         {
             this._server = Server;
@@ -44,6 +47,10 @@ namespace PillowSharp.Middelware
 
         public abstract Task<IRestResponse> View(string Database,string DocumentName,string ViewFunctionName,KeyValuePair<string,object>[] QueryParameter,Method HTTPMethod,string Filter);
 
+        public virtual string BuildURL(params string[] URL)
+        {
+            return string.Join("/", URL);
+        }
 
     }
 }

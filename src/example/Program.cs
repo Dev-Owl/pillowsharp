@@ -7,6 +7,7 @@ using System.Linq;
 using PillowSharp.CouchType;
 using Newtonsoft.Json;
 using System.IO;
+using System.Text;
 
 namespace test
 {
@@ -50,13 +51,13 @@ namespace test
         }
         public static async Task ListDB(){
             Console.WriteLine("DB on server:");
-            var dbs = await client.AllDatabase();
+            var dbs = await client.GetListOfAllDatabases();
             dbs.ForEach(db => Console.WriteLine($"Found DB {db}"));
         }
 
         public static async Task GetUUIDS(){
             Console.WriteLine("Lets get 10 UUIDS from couch server");
-            var uuidResponse = await client.GetUUID(Count:10);
+            var uuidResponse = await client.GetManyUUIDs(AmountOfUUIDs:10);
             foreach(var id in uuidResponse.UUIDS){
                 Console.WriteLine(id);
             }
@@ -67,19 +68,19 @@ namespace test
             Console.WriteLine("Creating DB pillow");
             if(!await client.DbExists("pillow"))
             {
-                if( await client.CreateDatabase("pillow"))
+                if( await client.CreateNewDatabase("pillow"))
                     Console.WriteLine("Database pillow created");
             }
             else
                 Console.WriteLine("Database pillow exists already");
             
-            client.Database = "pillow"; //Set the db for requests
+            client.ForcedDatabaseName = "pillow"; //Set the db for requests
         }
 
         public static async Task AddDocuments(){
             Console.WriteLine("Adding document to pillow");
             person = new Person(){Name="Christian",LastName="Muehle",Role="Developer" };
-            var result = await client.CreateDocument(person);
+            var result = await client.CreateANewDocument(person);
             if(result.Ok)
             {
                 Console.WriteLine($"Document created with id:{result.ID} and Rev:{result.Rev}");

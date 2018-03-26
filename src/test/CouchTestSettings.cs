@@ -11,7 +11,7 @@ public static class CouchSettings{
 
     public static PillowClient GetTestClient(string Database=null, ELoginTypes LoginType = ELoginTypes.TokenLogin) {
         Server.LoginType = LoginType;
-        return new PillowClient(CouchSettings.Server) {Database = Database}; 
+        return new PillowClient(CouchSettings.Server) {ForcedDatabaseName = Database}; 
     }
     
 }

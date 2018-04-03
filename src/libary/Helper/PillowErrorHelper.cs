@@ -1,23 +1,22 @@
-
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using pillowsharp.Middelware;
 using PillowSharp.BaseObject;
 using PillowSharp.CouchType;
 using PillowSharp.Middelware;
-using RestSharp;
 
 namespace PillowSharp.Helper
 {
     public static class PillowErrorHelper
     {
-        public static void HandleNoneOKResponse(IRestResponse Response,IJSONHelper JsonHelper)
+        public static void HandleNoneOKResponse(RestResponse Response,IJSONHelper JsonHelper)
         {
             CouchError error = null;
-            if((Response.StatusCode & (HttpStatusCode.InternalServerError | HttpStatusCode.NotFound | HttpStatusCode.Unauthorized))> 0){
+            if((Response.ResponseCode & (HttpStatusCode.InternalServerError | HttpStatusCode.NotFound | HttpStatusCode.Unauthorized))> 0){
                 error = JsonHelper.FromJSON<CouchError>(Response.Content);
                 if(error != null)
-                    error.HTTPCode = (int)Response.StatusCode;
+                    error.HTTPCode = (int)Response.ResponseCode;
                 else
                     throw new PillowException($"Error in Couch response, unable to parse error info. Raw:{Response.Content}");
             }
@@ -25,7 +24,7 @@ namespace PillowSharp.Helper
                 
                 error = new CouchError(){
                     Error = "Generic",
-                    HTTPCode = (int)Response.StatusCode,
+                    HTTPCode = (int)Response.ResponseCode,
                     Reason ="Error, see status code"
                 };
             }

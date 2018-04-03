@@ -2,10 +2,10 @@ using System;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using PillowSharp.BaseObject;
-using RestSharp;
 using System.Net;
 using PillowSharp.CouchType;
 using PillowSharp.Helper;
+using pillowsharp.Middelware;
 
 namespace PillowSharp.Middelware.Default 
 {
@@ -23,9 +23,9 @@ namespace PillowSharp.Middelware.Default
             return (T)JsonConvert.DeserializeObject(JSON,typeof(T));
         }
 
-        public T FromJSON<T>(IRestResponse Response) where T : new()
+        public T FromJSON<T>(RestResponse Response) where T : new()
         {
-            if(Response.StatusCode == HttpStatusCode.OK || Response.StatusCode == HttpStatusCode.Created){
+            if(Response.ResponseCode == HttpStatusCode.OK || Response.ResponseCode == HttpStatusCode.Created){
                 //Get the normal object as requested
                 return FromJSON<T>(Response.Content);
             }

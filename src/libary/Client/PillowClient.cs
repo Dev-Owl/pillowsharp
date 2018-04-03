@@ -1,10 +1,10 @@
 
+using pillowsharp.Middelware;
 using PillowSharp.BaseObject;
 using PillowSharp.CouchType;
 using PillowSharp.Helper;
 using PillowSharp.Middelware;
 using PillowSharp.Middelware.Default;
-using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -101,7 +101,7 @@ namespace PillowSharp.Client
                 else
                 {
                     //Ensure that coockie is set for all requests, can be a new instance not yet made a call
-                    RequestHelper.SetCoockie(CouchEntryPoints.CoockieName, alreadyCreatedLoginToken);
+                    RequestHelper.SetCookie(CouchEntryPoints.CoockieName, alreadyCreatedLoginToken);
                 }
             }
         }
@@ -316,7 +316,7 @@ namespace PillowSharp.Client
             //Ask for file data
             var response = await RequestHelper.GetFile(Document.ID, AttributeName, Document.Rev, DatabaseToUse);
             //In case something went wrong throw an error
-            if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created)
+            if (response.ResponseCode != HttpStatusCode.OK && response.ResponseCode != HttpStatusCode.Created)
                 PillowErrorHelper.HandleNoneOKResponse(response, JSONHelper);
             //Return file data
             return response.RawBytes;
@@ -340,7 +340,7 @@ namespace PillowSharp.Client
             await Authenticate();
             if (!DocumentID.StartsWith(CouchEntryPoints.DesignDoc)) //TODO refactore this check to reduce duplicated code
                 DocumentID = RequestHelper.BuildURL(CouchEntryPoints.DesignDoc, DocumentID);
-            return JSONHelper.FromJSON<CouchDocumentResponse<T>>(await RequestHelper.View(DatabaseToUse, DocumentID, ViewName, QueryParameter, Method.GET, null));
+            return JSONHelper.FromJSON<CouchDocumentResponse<T>>(await RequestHelper.View(DatabaseToUse, DocumentID, ViewName, QueryParameter, HttpRequestMethod.GET, null));
         }
 
         public async Task<CouchDocumentResponse<T>> FilterView<T>(string DocumentID, string ViewName, CouchViewFilter ViewFilter, KeyValuePair<string, object>[] QueryParameter = null, string DatabaseToUse = null) where T : new()
@@ -349,7 +349,7 @@ namespace PillowSharp.Client
             await Authenticate();
             if (!DocumentID.StartsWith(CouchEntryPoints.DesignDoc)) //TODO refactore this check to reduce duplicated code
                 DocumentID = RequestHelper.BuildURL(CouchEntryPoints.DesignDoc, DocumentID);
-            return JSONHelper.FromJSON<CouchDocumentResponse<T>>(await RequestHelper.View(DatabaseToUse, DocumentID, ViewName, QueryParameter, Method.POST, JSONHelper.ToJSON(ViewFilter)));
+            return JSONHelper.FromJSON<CouchDocumentResponse<T>>(await RequestHelper.View(DatabaseToUse, DocumentID, ViewName, QueryParameter, HttpRequestMethod.POST, JSONHelper.ToJSON(ViewFilter)));
         }
 
         public async Task<CouchDesignDocument> GetDesignDocument(string DocumentID, string DatabaseToUse = null)
@@ -417,13 +417,13 @@ namespace PillowSharp.Client
         }
 
         //Shorthand fucntion for simple post request
-        private Task<IRestResponse> HttpPost(string URL, string Body)
+        private Task<RestResponse> HttpPost(string URL, string Body)
         {
             return RequestHelper.Post(URL, Body);
         }
 
         //Internal, convert all response to the given object
-        private T FromResponse<T>(IRestResponse Response) where T : new()
+        private T FromResponse<T>(RestResponse Response) where T : new()
         {
             return JSONHelper.FromJSON<T>(Response);
         }

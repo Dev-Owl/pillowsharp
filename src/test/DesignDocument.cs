@@ -74,7 +74,7 @@ namespace test
         {
            _RunViewDesign().Wait();
         }
-        public async Task _RunViewDesign(){
+        private async Task _RunViewDesign(){
             await _CreateDesign();
             var testDoc = await DocumentTests.CreateTestDocument(this.TestDB);//create a doc in design test db            
             var client = GetTestClient();

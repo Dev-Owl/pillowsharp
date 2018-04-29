@@ -18,7 +18,7 @@ namespace test
             TestDB = BaseDBName + Rnd.Next(Int16.MaxValue);
         }
 
-        public PillowClient GetTestClient(ELoginTypes LoginType = ELoginTypes.TokenLogin)
+        public PillowClient GetTestClient(ELoginTypes LoginType = ELoginTypes.BasicAuth)
         {
             return CouchSettings.GetTestClient(TestDB, LoginType);
         }

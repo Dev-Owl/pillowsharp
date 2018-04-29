@@ -25,7 +25,6 @@ namespace test
 
         public static async Task Work(){
             Console.WriteLine("Hello World, its Pillow#!");
-            var client = new PillowClient();
             client = new PillowClient(new BasicCouchDBServer("http://127.0.0.1:5984",new CouchLoginData("admin","admin"),ELoginTypes.TokenLogin));
             try
             {

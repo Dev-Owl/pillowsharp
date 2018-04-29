@@ -8,6 +8,6 @@ dotnet: 2.0.0
 services:
   - couchdb
 before_script: 
-  - ./src/dev_couch2_setup.sh
+  - ./src/dev_couch1_setup.sh
 script: 
   - ./src/build.sh

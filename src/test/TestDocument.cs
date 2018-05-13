@@ -9,52 +9,81 @@ using PillowSharp.CouchType;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using Newtonsoft.Json;
 namespace test
 {
-        public class TestDocument : CouchDocument{
-            public int IntProp { get; set; }
-            public string StringProp { get; set; }
+    public class TestDocument : CouchDocument
+    {
+        public int IntProp { get; set; }
+        public string StringProp { get; set; }
 
-            public List<string> ListProp { get; set; }
+        public List<string> ListProp { get; set; }
 
-            public TestDocumentSmall SubObj { get; set; }
+        public TestDocumentSmall SubObj { get; set; }
 
-            public List<TestDocumentSmall> SubObjList { get; set; }
+        public List<TestDocumentSmall> SubObjList { get; set; }
 
-            public TestDocument()
-            {   
-                IntProp = new Random().Next(1,23456789);
-                StringProp ="This are not the droids you are loOking for";
-                ListProp = new  List<string>(){"a","b","1337"};
-                SubObj = new TestDocumentSmall();
-                SubObjList = new List<TestDocumentSmall>() {new TestDocumentSmall(),new TestDocumentSmall()};
-            }
+        [JsonProperty()]
+        private Dictionary<string, string> DicTest { get; set; }
 
-            public bool AllSet()
+        public static TestDocument GenerateTestObject()
+        {
+            return new TestDocument()
             {
-                return IntProp > 0 && !string.IsNullOrEmpty(StringProp) && ListProp.Count > 0 && SubObj != null && SubObjList.Count >0 && !SubObjList.Any(o => o == null);
-
-            }
-
-            public override bool Equals(object obj){
-                if(obj is TestDocument){
-                    var doc = obj as TestDocument;
-                     return  doc.ID == this.ID && doc.Rev == doc.Rev;
-                }
-                return false;
-            }
-            //Override to remove warning
-            public override int GetHashCode(){
-                return 0;
-            }
+                IntProp = new Random().Next(1, 23456789),
+                 StringProp = "This are not the droids you are loOking for",
+            ListProp = new List<string>() { "a", "b", "1337" },
+            SubObj =  TestDocumentSmall.GenerateTestDocumentSmall(),
+            SubObjList = new List<TestDocumentSmall>() {  TestDocumentSmall.GenerateTestDocumentSmall(), TestDocumentSmall.GenerateTestDocumentSmall() },
+            DicTest = new Dictionary<string, string>() { {"a","b" },{"c","d" } }
+            };
+          
         }
 
-        public class TestDocumentSmall{
-            public string TestProp { get; set; }
+        public bool AllSet()
+        {
+            return IntProp > 0
+                   && !string.IsNullOrEmpty(StringProp)
+                   && ListProp.Count > 0
+                   && SubObj != null
+                   && SubObjList.Count > 0
+                   && !SubObjList.Any(o => o == null)
+                   && DicTest != null
+                   && DicTest.ContainsKey("a")
+                   && DicTest.ContainsKey("c");
 
-            public TestDocumentSmall()
-            {
-                TestProp ="FuBar";
-            }
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is TestDocument)
+            {
+                var doc = obj as TestDocument;
+                return doc.ID == this.ID && doc.Rev == this.Rev;
+            }
+            return false;
+        }
+        //Override to remove warning
+        public override int GetHashCode()
+        {
+            return 0;
+        }
+    }
+
+    public class TestDocumentSmall
+    {
+        public string TestProp { get; set; }
+
+        public TestDocumentSmall()
+        {
+        }
+
+        public static TestDocumentSmall GenerateTestDocumentSmall()
+        {
+            return new TestDocumentSmall()
+            {
+                TestProp = "FuBar"
+            };
+        }
+    }
 }

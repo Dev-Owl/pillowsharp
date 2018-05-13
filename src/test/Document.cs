@@ -29,13 +29,13 @@ namespace test
 
         public static async Task<TestDocument> CreateTestDocument(string Database)
         {
-            var testDoc = new TestDocument();
+            var testDoc = TestDocument.GenerateTestObject();
             var client = CouchSettings.GetTestClient(Database);
             var result = await client.CreateANewDocument(testDoc,DatabaseToCreateDocumentIn:Database); 
             //Ensure all needed parts are set by the client
             Assert.True(result.Ok,"Error during document creation");
             Assert.False(string.IsNullOrEmpty( testDoc.ID ),"ID was not set for new document");
-            Assert.False(string.IsNullOrEmpty( testDoc.Rev ),"Rev was not set for new document");
+            Assert.False(string.IsNullOrEmpty(testDoc.Rev), "Rev was not set for new document");
             return testDoc;
         }
 
@@ -44,6 +44,7 @@ namespace test
         private async Task _CreateDocument(){
            LastDocument =await CreateTestDocument(this.TestDB);
         }
+
         [Fact]
         public void GetDocument(){
             _CreateDocument().Wait(); // ensure document exists
@@ -119,7 +120,7 @@ namespace test
             var lastRev = LastDocument.Rev;
             LastDocument.StringProp ="Luke, I'm your father!";
             
-            var documentList = new List<TestDocument>(){new TestDocument(),new TestDocument(),LastDocument};
+            var documentList = new List<TestDocument>(){ TestDocument.GenerateTestObject(), TestDocument.GenerateTestObject(), LastDocument};
             var result = await client.UpdateDocuments(documentList);
             Assert.True(result.Count() == documentList.Count,"Result list was not the same length as document list");
             Assert.True(documentList.All(d => !string.IsNullOrEmpty(d.ID)),"Not all IDs where set as expected");

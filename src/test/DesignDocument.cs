@@ -14,7 +14,6 @@ namespace test
     public class DesignDocumentTests : BaseTest, IDisposable
     {
        
-        public TestDocument LastDocument { get; set; }
         public CouchDesignDocument LastDesignDoc {get;set;}
 
         public DesignDocumentTests():base("pillowtest_designdoc")

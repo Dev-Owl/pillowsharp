@@ -296,12 +296,12 @@ namespace PillowSharp.Client
             return JSONHelper.FromJSON<CouchDocumentResponse<CouchViewResponse<AllDocResponse>>>(await RequestHelper.Get($"{DatabaseToUse}/{CouchEntryPoints.AllDocs}")); //return result to client
         }
         //TODO add a function that allows to pass a stream and mime type to use
-        public async Task<CouchDocumentChange> AddAttachment<T>(T Document, string AttributeName, string PathToFile, string DatabaseToUse = null) where T : CouchDocument
+        public async Task<CouchDocumentChange> AddAttachment<T>(T Document, string AttachmentName, string PathToFile, string DatabaseToUse = null) where T : CouchDocument
         {
             if (!System.IO.File.Exists(PathToFile))
                 throw new PillowException($"Unable to find file {PathToFile}!");
             DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
-            var result = JSONHelper.FromJSON<CouchDocumentChange>(await RequestHelper.UploadFile(Document.ID, AttributeName, Document.Rev, DatabaseToUse, PathToFile));
+            var result = JSONHelper.FromJSON<CouchDocumentChange>(await RequestHelper.UploadFile(Document.ID, AttachmentName, Document.Rev, DatabaseToUse, PathToFile));
             if (result.Ok)
             {
                 Document.Rev = result.Rev; // Update Revision number for caller
@@ -309,12 +309,12 @@ namespace PillowSharp.Client
             return result;
         }
 
-        public async Task<byte[]> GetAttachement<T>(T Document, string AttributeName, string DatabaseToUse = null) where T : CouchDocument
+        public async Task<byte[]> GetAttachement<T>(T Document, string AttachmentName, string DatabaseToUse = null) where T : CouchDocument
         {
             DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
             await Authenticate();
             //Ask for file data
-            var response = await RequestHelper.GetFile(Document.ID, AttributeName, Document.Rev, DatabaseToUse);
+            var response = await RequestHelper.GetFile(Document.ID, AttachmentName, Document.Rev, DatabaseToUse);
             //In case something went wrong throw an error
             if (response.ResponseCode != HttpStatusCode.OK && response.ResponseCode != HttpStatusCode.Created)
                 PillowErrorHelper.HandleNoneOKResponse(response, JSONHelper);

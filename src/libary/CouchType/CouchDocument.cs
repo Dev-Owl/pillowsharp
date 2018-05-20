@@ -15,5 +15,8 @@ namespace PillowSharp.CouchType
 
         [JsonProperty("_deleted")]
         public bool Deleted { get; set; } = false;
+
+        [JsonProperty("_attachments")]
+        public Dictionary<string, CouchAttachment> Attachments { get; set; } = null;
     }
 }

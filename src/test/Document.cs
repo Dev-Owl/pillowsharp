@@ -223,7 +223,31 @@ namespace test
         {
             GetTestClient().DeleteDatbase(this.TestDB).Wait();
         }
+        [Fact]
+        public void TestBaseDocumentProperties()
+        {
+            _CreateDocument().Wait();
+            var file = RandomTextFile();
+            Assert.True(File.Exists(file));
+            _AddAttachment(file).Wait();
+            CheckBasicProperties().Wait();
+        }
 
+        private async Task CheckBasicProperties()
+        {
+            var client = GetTestClient();
+            var documentFromDB = await client.GetDocument<TestDocument>(LastDocument.ID);
+            Assert.NotNull(documentFromDB.ID);
+            Assert.NotNull(documentFromDB.Rev);
+            Assert.False(documentFromDB.Deleted);
+            Assert.NotNull(documentFromDB.Attachments);
+            Assert.True(documentFromDB.Attachments.Count == 1);
+            var firstAttachment = documentFromDB.Attachments.First();
+            Assert.True(firstAttachment.Key == "test.txt");
+            Assert.NotNull(firstAttachment.Value.ContentType);
+            Assert.True(firstAttachment.Value.Length > 0);
+
+        }
       
     }
 }

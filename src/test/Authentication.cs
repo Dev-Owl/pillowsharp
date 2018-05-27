@@ -3,7 +3,7 @@ using Xunit;
 using PillowSharp;
 using PillowSharp.Client;
 using PillowSharp.BaseObject;
-using PillowSharp.Middelware.Default;
+using PillowSharp.Middleware.Default;
 using System.Threading.Tasks;
 
 namespace test

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using PillowSharp.Middelware;
+using PillowSharp.Middleware;
 
 namespace PillowSharp.CouchType
 {

@@ -1,7 +1,7 @@
 using System;
 using PillowSharp.BaseObject;
 
-namespace PillowSharp.Middelware.Default
+namespace PillowSharp.Middleware.Default
 {
     public class BasicCouchDBServer : ICouchdbServer
     {

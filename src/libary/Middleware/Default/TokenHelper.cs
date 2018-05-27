@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using PillowSharp.BaseObject;
 
-namespace PillowSharp.Middelware.Default
+namespace PillowSharp.Middleware.Default
 {
     public class TokenStorage{
 

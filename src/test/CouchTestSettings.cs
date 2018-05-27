@@ -1,7 +1,7 @@
 
 using PillowSharp.BaseObject;
 using PillowSharp.Client;
-using PillowSharp.Middelware.Default;
+using PillowSharp.Middleware.Default;
 
 public static class CouchSettings{
 

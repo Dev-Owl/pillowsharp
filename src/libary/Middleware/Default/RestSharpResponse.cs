@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace pillowsharp.Middelware.Default
+namespace pillowsharp.Middleware.Default
 {
     public class RestSharpResponse : RestResponse
     {

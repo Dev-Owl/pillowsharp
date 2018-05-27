@@ -1,10 +1,10 @@
 using System;
 using System.Net;
 using System.Threading.Tasks;
-using pillowsharp.Middelware;
+using pillowsharp.Middleware;
 using PillowSharp.BaseObject;
 using PillowSharp.CouchType;
-using PillowSharp.Middelware;
+using PillowSharp.Middleware;
 
 namespace PillowSharp.Helper
 {

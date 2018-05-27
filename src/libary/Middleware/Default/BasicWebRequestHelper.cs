@@ -11,11 +11,11 @@ using System.Collections.Generic;
 using System.IO;
 using PillowSharp.CouchType;
 using System.Web;
-using pillowsharp.Middelware;
-using pillowsharp.Middelware.Default;
+using pillowsharp.Middleware;
+using pillowsharp.Middleware.Default;
 using pillowsharp.Helper;
 
-namespace PillowSharp.Middelware.Default 
+namespace PillowSharp.Middleware.Default 
 {
     public class BasicWebRequestHelper : AWebRequestHelper
     {
@@ -26,7 +26,7 @@ namespace PillowSharp.Middelware.Default
         //URI to server, used for Cookie
         Uri serverURI = null;
 
-        //Create the middelware and pass server data to it
+        //Create the Middleware and pass server data to it
         public BasicWebRequestHelper(ICouchdbServer Server):base(Server)
         {
             UpdateServerData(Server);
@@ -71,24 +71,24 @@ namespace PillowSharp.Middelware.Default
         }
 
         //Base function for all requests
-        private Task<pillowsharp.Middelware.RestResponse> Request(RestRequest Request){
+        private Task<pillowsharp.Middleware.RestResponse> Request(RestRequest Request){
             
-            return client.GetResponseAsync(Request).Then(Response => new RestSharpResponse(Response) as pillowsharp.Middelware.RestResponse);
+            return client.GetResponseAsync(Request).Then(Response => new RestSharpResponse(Response) as pillowsharp.Middleware.RestResponse);
         }
 
         //Get a single document with the given revesion number from the db
-        public override Task<pillowsharp.Middelware.RestResponse> GetDocument(string ID, string Database, string Revision = null)
+        public override Task<pillowsharp.Middleware.RestResponse> GetDocument(string ID, string Database, string Revision = null)
         {
            return Get(BuildURL(Database,ID),new KeyValuePair<string, object>(Rev,Revision)); 
         }
         
         //Get request to the given URL
-        public override Task<pillowsharp.Middelware.RestResponse> Get(string Url)
+        public override Task<pillowsharp.Middleware.RestResponse> Get(string Url)
         {
            return Request(BuildRequestBase(Url));
         }
         //Get request to the given URL include Request parameters
-        public override Task<pillowsharp.Middelware.RestResponse> Get(string Url, params KeyValuePair<string,object>[] Parameter)
+        public override Task<pillowsharp.Middleware.RestResponse> Get(string Url, params KeyValuePair<string,object>[] Parameter)
         {
             var getRequest = BuildRequestBase(Url);
             if(Parameter != null)
@@ -103,7 +103,7 @@ namespace PillowSharp.Middelware.Default
         }
 
         //PUT request to the given URL with optional body
-        public override Task<pillowsharp.Middelware.RestResponse> Put(string Url, string Body = null)
+        public override Task<pillowsharp.Middleware.RestResponse> Put(string Url, string Body = null)
         {
             var putRequest = BuildRequestBase(Url,Method.PUT);
             if(!string.IsNullOrEmpty(Body))
@@ -112,12 +112,12 @@ namespace PillowSharp.Middelware.Default
         }
         
         //DELETE request to the given URL 
-        public override Task<pillowsharp.Middelware.RestResponse> Delete(string Uri)
+        public override Task<pillowsharp.Middleware.RestResponse> Delete(string Uri)
         {
             return Request( BuildRequestBase(Uri,Method.DELETE));
         }
         //Post requrest to the given URL with an optional Body
-        public override Task<pillowsharp.Middelware.RestResponse> Post(string Uri, string Body = null)
+        public override Task<pillowsharp.Middleware.RestResponse> Post(string Uri, string Body = null)
         {
              var postRequest = BuildRequestBase(Uri,Method.POST);
             if(!string.IsNullOrEmpty(Body))
@@ -133,7 +133,7 @@ namespace PillowSharp.Middelware.Default
             return getRequest;
         }
         //Add a file to an existing document
-        public override Task<pillowsharp.Middelware.RestResponse> UploadFile(string ID,string AttachmentName,string Revision,string Database,string File)
+        public override Task<pillowsharp.Middleware.RestResponse> UploadFile(string ID,string AttachmentName,string Revision,string Database,string File)
         {
             var putRequest = BuildFileBaseRequest(ID,AttachmentName,Revision,Database,Method.PUT);
             var contentType = MimeMapping.GetMimeType(File);
@@ -143,14 +143,14 @@ namespace PillowSharp.Middelware.Default
             return Request(putRequest);
         }
         //Delete a file from an existing document
-        public override Task<pillowsharp.Middelware.RestResponse> DeleteFile(string ID, string AttachmentName, string Revision, string Database)
+        public override Task<pillowsharp.Middleware.RestResponse> DeleteFile(string ID, string AttachmentName, string Revision, string Database)
         {
             var deleteRequest = BuildFileBaseRequest(ID,AttachmentName,Revision,Database,Method.DELETE);
             return Request(deleteRequest);
         }
 
         //Get a file from an existing document
-        public override Task<pillowsharp.Middelware.RestResponse> GetFile(string ID, string AttachmentName, string Revision, string Database)
+        public override Task<pillowsharp.Middleware.RestResponse> GetFile(string ID, string AttachmentName, string Revision, string Database)
         {
             return Request(BuildFileBaseRequest(ID,AttachmentName,Revision,Database,Method.GET));
         }
@@ -168,7 +168,7 @@ namespace PillowSharp.Middelware.Default
         }      
 
         //Run, change or create the given view
-        public override Task<pillowsharp.Middelware.RestResponse> View(string Database, string DocumentName, string ViewFunctionName, KeyValuePair<string, object>[] QueryParameter,HttpRequestMethod HTTPMethod,string Filter)
+        public override Task<pillowsharp.Middleware.RestResponse> View(string Database, string DocumentName, string ViewFunctionName, KeyValuePair<string, object>[] QueryParameter,HttpRequestMethod HTTPMethod,string Filter)
         {
             if (!Enum.IsDefined(typeof(Method), HTTPMethod.ToString()))
                 throw new PillowException($"Unable to use {HTTPMethod} as a request method in the default WebRequestHelper");

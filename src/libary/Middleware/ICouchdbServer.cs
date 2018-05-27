@@ -1,7 +1,7 @@
 using System;
 using PillowSharp.BaseObject;
 
-namespace PillowSharp.Middelware
+namespace PillowSharp.Middleware
 {
     public interface ICouchdbServer{
         string GetServerURL();

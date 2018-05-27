@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 
-namespace pillowsharp.Middelware
+namespace pillowsharp.Middleware
 {
     public abstract class RestResponse
     {

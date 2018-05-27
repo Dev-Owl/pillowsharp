@@ -1,7 +1,7 @@
 
 using System;
 using System.Threading.Tasks;
-using pillowsharp.Middelware.Default;
+using pillowsharp.Middleware.Default;
 using RestSharp;
 
 namespace PillowSharp.Helper

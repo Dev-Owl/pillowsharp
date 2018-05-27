@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using PillowSharp.BaseObject;
 using PillowSharp.CouchType;
 using System.Linq;
-using pillowsharp.Middelware;
+using pillowsharp.Middleware;
 
-namespace PillowSharp.Middelware
+namespace PillowSharp.Middleware
 {
     //TODO Remove Related to RestSharp from here
     public abstract class AWebRequestHelper

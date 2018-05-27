@@ -5,9 +5,9 @@ using PillowSharp.BaseObject;
 using System.Net;
 using PillowSharp.CouchType;
 using PillowSharp.Helper;
-using pillowsharp.Middelware;
+using pillowsharp.Middleware;
 
-namespace PillowSharp.Middelware.Default 
+namespace PillowSharp.Middleware.Default 
 {
     public class BasicJSONHelper : IJSONHelper
     {

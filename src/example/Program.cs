@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using PillowSharp.BaseObject;
 using PillowSharp.Client;
-using PillowSharp.Middelware.Default;
+using PillowSharp.Middleware.Default;
 using System.Linq;
 using PillowSharp.CouchType;
 using Newtonsoft.Json;

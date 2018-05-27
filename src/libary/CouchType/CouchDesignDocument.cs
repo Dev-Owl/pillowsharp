@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using PillowSharp.Helper;
-using PillowSharp.Middelware;
+using PillowSharp.Middleware;
 
 namespace PillowSharp.CouchType
 {

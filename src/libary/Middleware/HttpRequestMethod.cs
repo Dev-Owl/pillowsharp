@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace pillowsharp.Middelware
+namespace pillowsharp.Middleware
 {
     public enum HttpRequestMethod
     {

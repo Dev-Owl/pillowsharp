@@ -4,7 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using PillowSharp.BaseObject;
 using PillowSharp.CouchType;
-using PillowSharp.Middelware;
+using PillowSharp.Middleware;
 using RestSharp;
 
 namespace PillowSharp.Helper

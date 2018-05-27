@@ -1,5 +1,5 @@
-using PillowSharp.Middelware;
-using PillowSharp.Middelware.Default;
+using PillowSharp.Middleware;
+using PillowSharp.Middleware.Default;
 using PillowSharp.CouchType;
 using PillowSharp.BaseObject;
 

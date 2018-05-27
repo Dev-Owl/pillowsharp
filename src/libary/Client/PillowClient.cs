@@ -1,10 +1,10 @@
 
-using pillowsharp.Middelware;
+using pillowsharp.Middleware;
 using PillowSharp.BaseObject;
 using PillowSharp.CouchType;
 using PillowSharp.Helper;
-using PillowSharp.Middelware;
-using PillowSharp.Middelware.Default;
+using PillowSharp.Middleware;
+using PillowSharp.Middleware.Default;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +16,16 @@ namespace PillowSharp.Client
 {
     public class PillowClient
     {
-        //Settings
-        public PillowClientSettings ClientSettings = new PillowClientSettings();
+        /// <summary>
+        /// Settings for this client
+        /// </summary>
+        public PillowClientSettings ClientSettings { get; set; } = new PillowClientSettings();
 
         private ICouchdbServer serverConfiguration = null;
-        //Information about server,user and authentication method
+
+        /// <summary>
+        /// Information about server,user and authentication method
+        /// </summary>
         public ICouchdbServer ServerConfiguration
         {
             get
@@ -34,27 +39,43 @@ namespace PillowSharp.Client
             }
         }
 
-        //Class to handle all web request with couchdb
+        /// <summary>
+        /// Class to handle all web request with couchdb
+        /// </summary>
         public AWebRequestHelper RequestHelper { get; set; }
 
-        //JSON conversion for all response and requests
+        /// <summary>
+        /// JSON conversion for all response and requests
+        /// </summary>
         public IJSONHelper JSONHelper { get; set; }
 
-        //Force this database during all requests
+        /// <summary>
+        /// Force this database during all requests, overrides all other settings
+        /// </summary>
         public string ForcedDatabaseName { get; set; }
 
         //Storage for token shared between instances
         private TokenStorage loginTokenStorage = new TokenStorage();
 
 
-        //Create client with default middleware just the server config is needed
+        /// <summary>
+        /// Create client with default middleware just the server config is needed
+        /// </summary>
+        /// <param name="ServerConfiguration">Server url, user and password</param>
         public PillowClient(BasicCouchDBServer ServerConfiguration)
         {
             this.ServerConfiguration = ServerConfiguration;
             RequestHelper = new BasicWebRequestHelper(this.ServerConfiguration);
             JSONHelper = new BasicJSONHelper(ClientSettings.IgnoreJSONNull);
         }
-        //Custom client allows to set all parts
+
+
+        /// <summary>
+        /// Custom client allows to set all middleware parts
+        /// </summary>
+        /// <param name="ServerConfiguration">Server url, user and password</param>
+        /// <param name="RequestHelper">Middleware for webrequests</param>
+        /// <param name="JSONHelper">Middleware to handle JSON tasks</param>
         public PillowClient(ICouchdbServer ServerConfiguration,
                             AWebRequestHelper RequestHelper,
                             IJSONHelper JSONHelper)
@@ -67,6 +88,10 @@ namespace PillowSharp.Client
         //TODO Think about nicer way for await Authenticate in each call
 
         #region Server/DB Functions
+        /// <summary>
+        /// If Token authentication is used, login and store the token or add an existing to the current request
+        /// </summary>
+        /// <returns></returns>
         public async Task Authenticate()
         {
             //Only run this if auth type is set to token
@@ -74,7 +99,7 @@ namespace PillowSharp.Client
             {
                 //Try to get token from storage for current user
                 var currentLoginData = ServerConfiguration.GetLoginData();
-                var alreadyCreatedLoginToken = loginTokenStorage.Get(currentLoginData.UserName); 
+                var alreadyCreatedLoginToken = loginTokenStorage.Get(currentLoginData.UserName);
                 if (string.IsNullOrEmpty(alreadyCreatedLoginToken))
                 {
                     //new token is required post to server
@@ -88,10 +113,10 @@ namespace PillowSharp.Client
                         //store new token
                         alreadyCreatedLoginToken = restSessionCreateResponse.Cookies.FirstOrDefault(c => c.Name == CouchEntryPoints.CoockieName)?.Value;
                         //Ensure that token exists
-                         if (!string.IsNullOrEmpty(alreadyCreatedLoginToken))
-                             loginTokenStorage.Add(currentLoginData.UserName, alreadyCreatedLoginToken);
-                         else
-                             throw new PillowException("Authentication coockie not found in CouchDB response");
+                        if (!string.IsNullOrEmpty(alreadyCreatedLoginToken))
+                            loginTokenStorage.Add(currentLoginData.UserName, alreadyCreatedLoginToken);
+                        else
+                            throw new PillowException("Authentication coockie not found in CouchDB response");
                     }
                     else
                     {
@@ -106,17 +131,27 @@ namespace PillowSharp.Client
             }
         }
 
-        //Get IDs ,UUID, from couchDB by default one 
+        /// <summary>
+        /// Get IDs ,UUID, from couchDB by default one 
+        /// </summary>
+        /// <returns>New UUID</returns>
         public async Task<string> GetSingleUUID()
         {
-            //Create token if needed
-            await Authenticate();
-            //Make the request and return the list of IDS 
-            var uuidResponse = JSONHelper.FromJSON<CouchUUIDResponse>(await RequestHelper.Get(CouchEntryPoints.NewUUID, new KeyValuePair<string, object>(CouchEntryPoints.ParamCount, 1)));
-            return uuidResponse.UUIDS.FirstOrDefault();
+            var result = await _GetUUIDs(AmountOfUUIDs: 1);
+            return result.UUIDS.FirstOrDefault();
         }
 
+        /// <summary>
+        /// Get IDs ,UUID, from couchDB
+        /// </summary>
+        /// <param name="AmountOfUUIDs">Number of ID´s you need</param>
+        /// <returns>List of ID´s</returns>
         public async Task<CouchUUIDResponse> GetManyUUIDs(int AmountOfUUIDs)
+        {
+            return await _GetUUIDs(AmountOfUUIDs);
+        }
+
+        private async Task<CouchUUIDResponse> _GetUUIDs(int AmountOfUUIDs = 1)
         {
             //Create token if needed
             await Authenticate();
@@ -124,7 +159,11 @@ namespace PillowSharp.Client
             return JSONHelper.FromJSON<CouchUUIDResponse>(await RequestHelper.Get(CouchEntryPoints.NewUUID, new KeyValuePair<string, object>(CouchEntryPoints.ParamCount, AmountOfUUIDs)));
         }
 
-        //Check if a db exists in the current server
+        /// <summary>
+        /// Check if a db exists in the current server
+        /// </summary>
+        /// <param name="Name">Database name</param>
+        /// <returns></returns>
         public async Task<bool> DbExists(string Name)
         {
             //Create token if needed
@@ -133,7 +172,10 @@ namespace PillowSharp.Client
             return (await GetListOfAllDatabases()).Contains(Name);
         }
 
-        //Get a list of all current dbs
+        /// <summary>
+        /// Get a list of all current dbs
+        /// </summary>
+        /// <returns>List of db names</returns>
         public async Task<List<string>> GetListOfAllDatabases()
         {
             //Create token if needed
@@ -144,7 +186,11 @@ namespace PillowSharp.Client
             return FromResponse<List<string>>(result);
         }
 
-        //Create a database on the server with the given name
+        /// <summary>
+        /// Create a database on the server with the given name
+        /// </summary>
+        /// <param name="Name">New database name</param>
+        /// <returns></returns>
         public async Task<bool> CreateNewDatabase(string Name)
         {
             //Create token if needed
@@ -155,6 +201,11 @@ namespace PillowSharp.Client
             return FromResponse<CouchConfirm>(result)?.Ok ?? false;
         }
 
+        /// <summary>
+        /// Delete a database on the server
+        /// </summary>
+        /// <param name="Name">Name of the database</param>
+        /// <returns></returns>
         public async Task<bool> DeleteDatbase(string Name)
         {
             await Authenticate();
@@ -163,7 +214,13 @@ namespace PillowSharp.Client
         #endregion
 
         #region Document Functions
-        //Create a document in the given server and database
+        /// <summary>
+        /// Create a document in the given server and database
+        /// </summary>
+        /// <typeparam name="T">Type of the document</typeparam>
+        /// <param name="NewDocument">The new document</param>
+        /// <param name="DatabaseToCreateDocumentIn">Optional, set the db name</param>
+        /// <returns>The change record from CouchDb</returns>
         public async Task<CouchDocumentChange> CreateANewDocument<T>(T NewDocument, string DatabaseToCreateDocumentIn = null) where T : new()
         {
             //Get datbase to use
@@ -196,7 +253,13 @@ namespace PillowSharp.Client
             return result;
         }
 
-        //Delete a single document in the db
+        /// <summary>
+        /// Delete a single document in the db
+        /// </summary>
+        /// <typeparam name="T">Type of the document</typeparam>
+        /// <param name="Document">Document to delete</param>
+        /// <param name="DatabaseToDeleteDocumentIn">Optional, set the db name</param>
+        /// <returns>The change record from CouchDb</returns>
         public async Task<CouchDocumentChange> DeleteDocument<T>(T Document, string DatabaseToDeleteDocumentIn = null) where T : CouchDocument
         {
             return (await DeleteDocuments<T>(new List<T>() { Document }, DatabaseToDeleteDocumentIn)).FirstOrDefault();
@@ -221,12 +284,26 @@ namespace PillowSharp.Client
             return responseList;
         }
 
+        /// <summary>
+        /// Update a document in CouchDb
+        /// </summary>
+        /// <typeparam name="T">Type of the document</typeparam>
+        /// <param name="Document">Document to update</param>
+        /// <param name="DatabaseToUpdateDocumentIn">Optional, set the db name</param>
+        /// <returns>The change record from CouchDb</returns>
         public async Task<CouchDocumentChange> UpdateDocument<T>(T Document, string DatabaseToUpdateDocumentIn = null) where T : CouchDocument
         {
             //Call bulk update db will be set in there
             return (await UpdateDocuments<T>(new List<T>() { Document }, DatabaseToUpdateDocumentIn)).FirstOrDefault();
         }
-        //Update,Create,Delete Documents
+
+        /// <summary>
+        /// Bulk Update,Create,Delete Documents
+        /// </summary>
+        /// <typeparam name="T">Document type to change</typeparam>
+        /// <param name="Documents">List of documents</param>
+        /// <param name="DatabaseToUpdateDocumentsIn">Optional, set the db name</param>
+        /// <returns>Change set for all documents</returns>
         public async Task<List<CouchDocumentChange>> UpdateDocuments<T>(List<T> Documents, string DatabaseToUpdateDocumentsIn = null) where T : CouchDocument
         {
             DatabaseToUpdateDocumentsIn = GetDBToUseForRequest(typeof(T), DatabaseToUpdateDocumentsIn);
@@ -267,7 +344,12 @@ namespace PillowSharp.Client
             return updateCallResult;
         }
 
-        //Basic function to get a list of documents, allows the usage of views or any multi response URL
+        /// <summary>
+        /// Basic function to get a list of documents, allows the usage of views or any multi response URL
+        /// </summary>
+        /// <typeparam name="T">Type of documents</typeparam>
+        /// <param name="RequestURL">URL for GET request</param>
+        /// <returns>Generic document response for T</returns>
         public async Task<CouchDocumentResponse<T>> GetDocuments<T>(string RequestURL) where T : new()
         {
             //Create token if needed
@@ -277,7 +359,14 @@ namespace PillowSharp.Client
             return FromResponse<CouchDocumentResponse<T>>(result);
         }
 
-        //Get a single document, optional with Rev number
+        /// <summary>
+        /// Get a single document, optional with Rev number
+        /// </summary>
+        /// <typeparam name="T">Document Type</typeparam>
+        /// <param name="ID">ID of the document to get</param>
+        /// <param name="Revision">Optional, revision of the document</param>
+        /// <param name="DatabaseToUse">Optional, set the db name</param>
+        /// <returns>Document from Db</returns>
         public async Task<T> GetDocument<T>(string ID, string Revision = null, string DatabaseToUse = null) where T : new()
         {
             //Document == null -> check if entity has meta 
@@ -288,14 +377,28 @@ namespace PillowSharp.Client
             return FromResponse<T>(result);
         }
 
-        //Get all documents in the given database
+        /// <summary>
+        /// Get all documents in the given database
+        /// </summary>
+        /// <param name="Document">Optional, Document type, used to get the DB</param>
+        /// <param name="DatabaseToUse">Optional, Database for this request</param>
+        /// <returns></returns>
         public async Task<CouchDocumentResponse<CouchViewResponse<AllDocResponse>>> GetAllDocuments(Type Document = null, string DatabaseToUse = null)
         {
             DatabaseToUse = GetDBToUseForRequest(Document, DatabaseToUse); // Get database to use
             //TODO Ugly response to many <> and remove URL building in client
-            return JSONHelper.FromJSON<CouchDocumentResponse<CouchViewResponse<AllDocResponse>>>(await RequestHelper.Get($"{DatabaseToUse}/{CouchEntryPoints.AllDocs}")); //return result to client
+            return JSONHelper.FromJSON<CouchDocumentResponse<CouchViewResponse<AllDocResponse>>>(await RequestHelper.Get(RequestHelper.BuildURL(DatabaseToUse, CouchEntryPoints.AllDocs))); //return result to client
         }
-        //TODO add a function that allows to pass a stream and mime type to use
+
+        /// <summary>
+        /// Add an attachment to an existing document
+        /// </summary>
+        /// <typeparam name="T">Type of document</typeparam>
+        /// <param name="Document">The document to attach the file</param>
+        /// <param name="AttachmentName">Name of the attachment</param>
+        /// <param name="PathToFile">Path to the file</param>
+        /// <param name="DatabaseToUse">Optional, Database for this request</param>
+        /// <returns></returns>
         public async Task<CouchDocumentChange> AddAttachment<T>(T Document, string AttachmentName, string PathToFile, string DatabaseToUse = null) where T : CouchDocument
         {
             if (!System.IO.File.Exists(PathToFile))
@@ -309,6 +412,14 @@ namespace PillowSharp.Client
             return result;
         }
 
+        /// <summary>
+        /// Download an attachment from a document
+        /// </summary>
+        /// <typeparam name="T">Document type to use</typeparam>
+        /// <param name="Document">Document with attachment</param>
+        /// <param name="AttachmentName">Name of the attachment to download</param>
+        /// <param name="DatabaseToUse">Optional, Database for this request</param>
+        /// <returns></returns>
         public async Task<byte[]> GetAttachement<T>(T Document, string AttachmentName, string DatabaseToUse = null) where T : CouchDocument
         {
             DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
@@ -322,6 +433,14 @@ namespace PillowSharp.Client
             return response.RawBytes;
         }
 
+        /// <summary>
+        /// Delete an attachment from a document
+        /// </summary>
+        /// <typeparam name="T">Document type to use</typeparam>
+        /// <param name="Document">The document with attachment</param>
+        /// <param name="AttributeName">Name of the attachment</param>
+        /// <param name="DatabaseToUse">Optional, Database for this request</param>
+        /// <returns></returns>
         public async Task<CouchDocumentChange> DeleteAttachment<T>(T Document, string AttributeName, string DatabaseToUse = null) where T : CouchDocument
         {
             DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
@@ -333,49 +452,84 @@ namespace PillowSharp.Client
             }
             return result;
         }
+        //Ensure the ID is valid for a desgine document 
+        private string EnsureDocumentIDIsValidDesignDocumentID(string DocumentID)
+        {
+            if (string.IsNullOrEmpty(DocumentID))
+                throw new PillowException("Design document ID can´t be null");
+            if (!DocumentID.StartsWith(CouchEntryPoints.DesignDoc))
+                DocumentID = RequestHelper.BuildURL(CouchEntryPoints.DesignDoc, DocumentID);
+            return DocumentID;
+        }
 
+        /// <summary>
+        /// Get a view from CouchDB
+        /// </summary>
+        /// <typeparam name="T">Document type for view</typeparam>
+        /// <param name="DocumentID">Id of the design document with the view</param>
+        /// <param name="ViewName">Name of the view insiide the document</param>
+        /// <param name="QueryParameter">Optional query parameter for the view</param>
+        /// <param name="DatabaseToUse">Optional, Database for this request</param>
+        /// <returns></returns>
         public async Task<CouchDocumentResponse<T>> GetView<T>(string DocumentID, string ViewName, KeyValuePair<string, object>[] QueryParameter = null, string DatabaseToUse = null) where T : new()
         {
             DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
             await Authenticate();
-            if (!DocumentID.StartsWith(CouchEntryPoints.DesignDoc)) //TODO refactore this check to reduce duplicated code
-                DocumentID = RequestHelper.BuildURL(CouchEntryPoints.DesignDoc, DocumentID);
+            DocumentID = EnsureDocumentIDIsValidDesignDocumentID(DocumentID);
             return JSONHelper.FromJSON<CouchDocumentResponse<T>>(await RequestHelper.View(DatabaseToUse, DocumentID, ViewName, QueryParameter, HttpRequestMethod.GET, null));
         }
 
+        /// <summary>
+        /// Run a filter view 
+        /// </summary>
+        /// <typeparam name="T">Document type for view</typeparam>
+        /// <param name="DocumentID">Id of the design document with the view</param>
+        /// <param name="ViewName">Name of the view insiide the document</param>
+        /// <param name="ViewFilter">List of keys to be used as a filter</param>
+        /// <param name="QueryParameter">Optional query parameter for the view</param>
+        /// <param name="DatabaseToUse">Optional, Database for this request</param>
+        /// <returns></returns>
         public async Task<CouchDocumentResponse<T>> FilterView<T>(string DocumentID, string ViewName, CouchViewFilter ViewFilter, KeyValuePair<string, object>[] QueryParameter = null, string DatabaseToUse = null) where T : new()
         {
             DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
             await Authenticate();
-            if (!DocumentID.StartsWith(CouchEntryPoints.DesignDoc)) //TODO refactore this check to reduce duplicated code
-                DocumentID = RequestHelper.BuildURL(CouchEntryPoints.DesignDoc, DocumentID);
+            DocumentID = EnsureDocumentIDIsValidDesignDocumentID(DocumentID);
             return JSONHelper.FromJSON<CouchDocumentResponse<T>>(await RequestHelper.View(DatabaseToUse, DocumentID, ViewName, QueryParameter, HttpRequestMethod.POST, JSONHelper.ToJSON(ViewFilter)));
         }
 
+        /// <summary>
+        /// Get a design document
+        /// </summary>
+        /// <param name="DocumentID">ID of the desgin document</param>
+        /// <param name="DatabaseToUse">Optional, Database for this request</param>
+        /// <returns></returns>
         public async Task<CouchDesignDocument> GetDesignDocument(string DocumentID, string DatabaseToUse = null)
         {
             DatabaseToUse = GetDBToUseForRequest(null, DatabaseToUse);
             await Authenticate();
-            if (!DocumentID.StartsWith(CouchEntryPoints.DesignDoc)) //TODO refactore this check to reduce duplicated code
-                DocumentID = RequestHelper.BuildURL(CouchEntryPoints.DesignDoc, DocumentID);
-            return JSONHelper.FromJSON<CouchDesignDocument>(await RequestHelper.Get(RequestHelper.BuildURL(DatabaseToUse,DocumentID)));
+            DocumentID = EnsureDocumentIDIsValidDesignDocumentID(DocumentID);
+            return JSONHelper.FromJSON<CouchDesignDocument>(await RequestHelper.Get(RequestHelper.BuildURL(DatabaseToUse, DocumentID)));
         }
 
+        /// <summary>
+        /// Create or update a desgin document
+        /// </summary>
+        /// <param name="DesignDocument">The desgin document to use</param>
+        /// <param name="DatabaseToUse">Optional, Database for this request</param>
+        /// <returns></returns>
         public async Task<CouchDocumentChange> UpsertDesignDocument(CouchDesignDocument DesignDocument, string DatabaseToUse = null)
         {
             DatabaseToUse = GetDBToUseForRequest(DesignDocument.GetType(), DatabaseToUse);
             await Authenticate();
-            if (string.IsNullOrEmpty(DesignDocument.ID))
+            if (string.IsNullOrEmpty(DesignDocument.ID) && ClientSettings.AutoGenerateID)
             {
-                if (ClientSettings.AutoGenerateID)
-                    if (ClientSettings.UseCouchUUID)
-                        DesignDocument.ID = await GetSingleUUID();
-                    else
-                        DesignDocument.ID = Guid.NewGuid().ToString();
+                if (ClientSettings.UseCouchUUID)
+                    DesignDocument.ID = await GetSingleUUID();
+                else
+                    DesignDocument.ID = Guid.NewGuid().ToString();
             }
-            if (!DesignDocument.ID.StartsWith(CouchEntryPoints.DesignDoc))
-                DesignDocument.ID = RequestHelper.BuildURL(CouchEntryPoints.DesignDoc, DesignDocument.ID);
-            var result = JSONHelper.FromJSON<CouchDocumentChange>(await RequestHelper.Put(RequestHelper.BuildURL(DatabaseToUse,DesignDocument.ID), JSONHelper.ToJSON(DesignDocument)));
+            DesignDocument.ID = EnsureDocumentIDIsValidDesignDocumentID(DesignDocument.ID);
+            var result = JSONHelper.FromJSON<CouchDocumentChange>(await RequestHelper.Put(RequestHelper.BuildURL(DatabaseToUse, DesignDocument.ID), JSONHelper.ToJSON(DesignDocument)));
             if (result.Ok)
             {
                 DesignDocument.ID = result.ID;

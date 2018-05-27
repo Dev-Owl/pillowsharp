@@ -1,5 +1,5 @@
 # Pillowsharp
-[![NuGet version (PillowSharp)](https://img.shields.io/nuget/v/PillowSharp.svg?style=flat-square)](https://https://www.nuget.org/packages/PillowSharp/)
+[![NuGet version (PillowSharp)](https://img.shields.io/nuget/v/PillowSharp.svg?style=flat-square)](https://www.nuget.org/packages/PillowSharp/)
 [![Build Status](https://travis-ci.org/Dev-Owl/pillowsharp.svg?branch=master)](https://travis-ci.org/Dev-Owl/pillowsharp)
 
 ## Content

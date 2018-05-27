@@ -6,6 +6,7 @@
 * Description
 * Setup
 * Install
+* Planned features
 * Basic usage
 * How to...
 * By example:
@@ -35,6 +36,14 @@ In case you encounter issues in step 5, please check the CouchSettings.cs file i
 
 ## Install
 Either you can clone the repository and run the related build script (please see the Setup section) or download a build from nuget.org
+
+## Planned features
+The following things will be added, or at least I would like to add them:
+
+* Replication end point support
+* Replication status check
+* Replication conflict support
+* Backup and restore of a db (will be in a different tool)
 
 # Basic usage
 All communication with CouchDB uses the PillowClient class, you can generate a new instance like this:

@@ -11,7 +11,8 @@
     <PackageLicenseUrl>https://github.com/Dev-Owl/pillowsharp/blob/master/LICENSE.md</PackageLicenseUrl>
     <Description>Simple and easy to use client for Apache CouchDB</Description>
     <PackageReleaseNotes>Added more documentation to the client class
-Added attachment to base document</PackageReleaseNotes>
+Added attachment to base document
+Added support for HEAD call to get latest document revision</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />

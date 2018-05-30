@@ -21,6 +21,12 @@ namespace pillowsharp.Middleware.Default
                 cookies.Add(new SimpleCookie() { Name = restCookie.Name, Value = restCookie.Value });
             }
             this.Cookies = cookies;
+            this.Header = new List<KeyValuePair<string, string>>();
+            foreach (var header in Response.Headers.Where(h => h.Type == ParameterType.HttpHeader))
+            {
+                this.Header.Add(new KeyValuePair<string, string>(header.Name, header.Value?.ToString()));
+            }
+
         }
     }
 }

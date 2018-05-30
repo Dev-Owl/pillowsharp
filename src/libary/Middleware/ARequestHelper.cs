@@ -47,6 +47,8 @@ namespace PillowSharp.Middleware
 
         public abstract Task<RestResponse> View(string Database,string DocumentName,string ViewFunctionName,KeyValuePair<string,object>[] QueryParameter, HttpRequestMethod HTTPMethod,string Filter);
 
+        public abstract Task<RestResponse> Head(string Uri);
+
         public virtual string BuildURL(params string[] URL)
         {
             return string.Join("/", URL);

@@ -179,5 +179,9 @@ namespace PillowSharp.Middleware.Default
             return Request(viewRequest);
         }
 
+        public override Task<pillowsharp.Middleware.RestResponse> Head(string Uri)
+        {
+            return Request(BuildRequestBase(Uri, Method.HEAD));
+        }
     }
 }

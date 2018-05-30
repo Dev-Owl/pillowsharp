@@ -537,8 +537,18 @@ namespace PillowSharp.Client
             }
             return result;
         }
-
-
+        /// <summary>
+        /// Gets you the current Revision of the document in CouchDB
+        /// </summary>
+        /// <param name="DocumentID">Document to check</param>
+        /// <param name="DatabaseToUse">Optional, Database for this request</param>
+        /// <returns></returns>
+        public async Task<string> GetCurrentDocumentRevision(string DocumentID,Type CouchDocumentType=null,string DatabaseToUse = null)
+        {
+            DatabaseToUse = GetDBToUseForRequest(CouchDocumentType, DatabaseToUse);
+            var result = await RequestHelper.Head(RequestHelper.BuildURL(DatabaseToUse, DocumentID));
+            return result.Header.Where(h => h.Key == "ETag").Select(h => h.Value).FirstOrDefault()?.Trim('"');
+        }
         #endregion
 
         #region Private Functions        

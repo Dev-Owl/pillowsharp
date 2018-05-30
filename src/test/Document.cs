@@ -233,6 +233,21 @@ namespace test
             CheckBasicProperties().Wait();
         }
 
+        [Fact]
+        public void TestDocumentHead()
+        {
+            _CreateDocument().Wait();
+            _TestDocumentHead().Wait();
+        }
+
+        private async Task _TestDocumentHead()
+        {
+            var client = GetTestClient();
+            var result = await client.GetCurrentDocumentRevision(LastDocument.ID, LastDocument.GetType());
+            Assert.NotNull(result);
+            Assert.Equal(LastDocument.Rev, result);
+        }
+
         private async Task CheckBasicProperties()
         {
             var client = GetTestClient();

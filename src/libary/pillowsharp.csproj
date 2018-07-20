@@ -3,16 +3,14 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>PillowSharp</PackageId>
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
     <Authors>Christian Muehle info@devowl.de</Authors>
     <Company>DevOwl</Company>
     <RepositoryUrl>https://github.com/Dev-Owl/pillowsharp</RepositoryUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/Dev-Owl/pillowsharp/master/logo.png</PackageIconUrl>
     <PackageLicenseUrl>https://github.com/Dev-Owl/pillowsharp/blob/master/LICENSE.md</PackageLicenseUrl>
     <Description>Simple and easy to use client for Apache CouchDB</Description>
-    <PackageReleaseNotes>Added more documentation to the client class
-Added attachment to base document
-Added support for HEAD call to get latest document revision</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support for data property in attachments, allows to generate document with attachment in one call</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />

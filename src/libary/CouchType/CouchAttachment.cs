@@ -21,5 +21,8 @@ namespace PillowSharp.CouchType
 
         [JsonProperty("stub")]
         public bool Stub { get; set; }
+
+        [JsonProperty("data")]
+        public string Data { get; set; } 
     }
 }

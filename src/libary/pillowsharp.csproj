@@ -10,7 +10,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Dev-Owl/pillowsharp/master/logo.png</PackageIconUrl>
     <PackageLicenseUrl>https://github.com/Dev-Owl/pillowsharp/blob/master/LICENSE.md</PackageLicenseUrl>
     <Description>Simple and easy to use client for Apache CouchDB</Description>
-    <PackageReleaseNotes>Added support for data property in attachments, allows to generate document with attachment in one call</PackageReleaseNotes>
+    <PackageReleaseNotes>Added code to either call a function async or sync, all function over both ways. Added support for update document functions</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />

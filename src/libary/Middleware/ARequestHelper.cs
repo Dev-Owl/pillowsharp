@@ -33,7 +33,7 @@ namespace PillowSharp.Middleware
 
         public abstract Task<RestResponse> GetAsync(string Url,params KeyValuePair<string,object>[] Parameter);
         
-        public abstract Task<RestResponse> PutAsync(string Url,string Body=null);
+        public abstract Task<RestResponse> PutAsync(string Url,string Body=null,KeyValuePair<string,object>[] QueryParameter= null);
 
         public abstract Task<RestResponse> DeleteAsync(string Uri);
 
@@ -55,7 +55,7 @@ namespace PillowSharp.Middleware
 
         public abstract RestResponse Get(string Url,params KeyValuePair<string,object>[] Parameter);
         
-        public abstract RestResponse Put(string Url,string Body=null);
+        public abstract RestResponse Put(string Url,string Body=null,KeyValuePair<string,object>[] QueryParameter= null);
 
         public abstract RestResponse Delete(string Uri);
 

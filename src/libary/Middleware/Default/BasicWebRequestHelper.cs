@@ -129,17 +129,17 @@ namespace PillowSharp.Middleware.Default
             return Request(getRequest);
         }
 
-        public override Task<pillowsharp.Middleware.RestResponse> PutAsync(string Url, string Body = null)
+        public override Task<pillowsharp.Middleware.RestResponse> PutAsync(string Url, string Body = null,KeyValuePair<string,object>[] QueryParameter= null)
         {
             return Task.Factory.StartNew(() =>
             {
-                return this.Put(Url, Body);
+                return this.Put(Url, Body, QueryParameter);
             });
         }
         //PUT request to the given URL with optional body
-        public override pillowsharp.Middleware.RestResponse Put(string Url, string Body = null)
+        public override pillowsharp.Middleware.RestResponse Put(string Url, string Body = null,KeyValuePair<string,object>[] QueryParameter= null)
         {
-            var putRequest = BuildRequestBase(Url, Method.PUT);
+            var putRequest = BuildRequestBase(Url, Method.PUT,QueryParameter: QueryParameter);
             if (!string.IsNullOrEmpty(Body))
                 AddJSONBody(putRequest, Body);
             return Request(putRequest);

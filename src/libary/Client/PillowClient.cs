@@ -189,7 +189,7 @@ namespace PillowSharp.Client
         /// Get IDs ,UUID, from couchDB
         /// </summary>
         /// <param name="AmountOfUUIDs">Number of ID�s you need</param>
-        /// <returns>List of ID�s</returns>
+        /// <returns>List of IDs</returns>
         public CouchUUIDResponse GetManyUUIDs(int AmountOfUUIDs)
         {
             return _GetUUIDs(AmountOfUUIDs);
@@ -393,8 +393,9 @@ namespace PillowSharp.Client
         //Delete a list of documents in the db
         public Task<List<CouchDocumentChange>> DeleteDocumentsAsync<T>(List<T> Documents, string DatabaseToDeleteDocumentIn = null) where T : CouchDocument
         {
-            return Task.Factory.StartNew( () => {
-                return DeleteDocuments<T>(Documents,DatabaseToDeleteDocumentIn);
+            return Task.Factory.StartNew(() =>
+            {
+                return DeleteDocuments<T>(Documents, DatabaseToDeleteDocumentIn);
             });
         }
         //Delete a list of documents in the db
@@ -416,7 +417,7 @@ namespace PillowSharp.Client
             return responseList;
         }
 
-         /// <summary>
+        /// <summary>
         /// Update a document in CouchDb
         /// </summary>
         /// <typeparam name="T">Type of the document</typeparam>
@@ -425,8 +426,9 @@ namespace PillowSharp.Client
         /// <returns>The change record from CouchDb</returns>
         public Task<CouchDocumentChange> UpdateDocumentAsync<T>(T Document, string DatabaseToUpdateDocumentIn = null) where T : CouchDocument
         {
-            return Task.Factory.StartNew(() => {
-                return UpdateDocument<T>(Document,DatabaseToUpdateDocumentIn);
+            return Task.Factory.StartNew(() =>
+            {
+                return UpdateDocument<T>(Document, DatabaseToUpdateDocumentIn);
             });
         }
 
@@ -451,8 +453,9 @@ namespace PillowSharp.Client
         /// <returns>Change set for all documents</returns>
         public Task<List<CouchDocumentChange>> UpdateDocumentsAsync<T>(List<T> Documents, string DatabaseToUpdateDocumentsIn = null) where T : CouchDocument
         {
-            return Task.Factory.StartNew(() =>{
-                return UpdateDocuments<T>(Documents,DatabaseToUpdateDocumentsIn);
+            return Task.Factory.StartNew(() =>
+            {
+                return UpdateDocuments<T>(Documents, DatabaseToUpdateDocumentsIn);
             });
         }
         /// <summary>
@@ -501,14 +504,16 @@ namespace PillowSharp.Client
             );
             return updateCallResult;
         }
-         /// <summary>
+        /// <summary>
         /// Basic function to get a list of documents, allows the usage of views or any multi response URL
         /// </summary>
         /// <typeparam name="T">Type of documents</typeparam>
         /// <param name="RequestURL">URL for GET request</param>
         /// <returns>Generic document response for T</returns>
-        public Task<CouchDocumentResponse<T>> GetDocumentsAsync<T>(string RequestURL) where T : new(){
-            return Task.Factory.StartNew(() => {
+        public Task<CouchDocumentResponse<T>> GetDocumentsAsync<T>(string RequestURL) where T : new()
+        {
+            return Task.Factory.StartNew(() =>
+            {
                 return this.GetDocuments<T>(RequestURL);
             });
         }
@@ -527,7 +532,7 @@ namespace PillowSharp.Client
             var result = RequestHelper.Get(RequestURL);
             return FromResponse<CouchDocumentResponse<T>>(result);
         }
-         /// <summary>
+        /// <summary>
         /// Get a single document, optional with Rev number
         /// </summary>
         /// <typeparam name="T">Document Type</typeparam>
@@ -535,9 +540,11 @@ namespace PillowSharp.Client
         /// <param name="Revision">Optional, revision of the document</param>
         /// <param name="DatabaseToUse">Optional, set the db name</param>
         /// <returns>Document from Db</returns>
-        public Task<T> GetDocumentAsync<T>(string ID, string Revision = null, string DatabaseToUse = null) where T : new(){
-            return Task.Factory.StartNew(()=>{
-                return GetDocument<T>(ID,Revision,DatabaseToUse);
+        public Task<T> GetDocumentAsync<T>(string ID, string Revision = null, string DatabaseToUse = null) where T : new()
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return GetDocument<T>(ID, Revision, DatabaseToUse);
             });
 
         }
@@ -565,9 +572,11 @@ namespace PillowSharp.Client
         /// <param name="Document">Optional, Document type, used to get the DB</param>
         /// <param name="DatabaseToUse">Optional, Database for this request</param>
         /// <returns></returns>
-        public Task<CouchDocumentResponse<CouchViewResponse<AllDocResponse>>> GetAllDocumentsAsync(Type Document = null, string DatabaseToUse = null){
-            return Task.Factory.StartNew(() => {
-                return GetAllDocuments(Document,DatabaseToUse);
+        public Task<CouchDocumentResponse<CouchViewResponse<AllDocResponse>>> GetAllDocumentsAsync(Type Document = null, string DatabaseToUse = null)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return GetAllDocuments(Document, DatabaseToUse);
             });
         }
 
@@ -581,7 +590,7 @@ namespace PillowSharp.Client
         {
             DatabaseToUse = GetDBToUseForRequest(Document, DatabaseToUse); // Get database to use
             //TODO Ugly response to many <>
-            return JSONHelper.FromJSON<CouchDocumentResponse<CouchViewResponse<AllDocResponse>>>( 
+            return JSONHelper.FromJSON<CouchDocumentResponse<CouchViewResponse<AllDocResponse>>>(
                 RequestHelper.Get(RequestHelper.BuildURL(DatabaseToUse, CouchEntryPoints.AllDocs))); //return result to client
         }
 
@@ -594,9 +603,11 @@ namespace PillowSharp.Client
         /// <param name="PathToFile">Path to the file</param>
         /// <param name="DatabaseToUse">Optional, Database for this request</param>
         /// <returns></returns>
-        public Task<CouchDocumentChange> AddAttachmentAsync<T>(T Document, string AttachmentName, string PathToFile, string DatabaseToUse = null) where T : CouchDocument{
-            return Task.Factory.StartNew(() => {
-                return this.AddAttachment<T>(Document,AttachmentName,PathToFile,DatabaseToUse);
+        public Task<CouchDocumentChange> AddAttachmentAsync<T>(T Document, string AttachmentName, string PathToFile, string DatabaseToUse = null) where T : CouchDocument
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return this.AddAttachment<T>(Document, AttachmentName, PathToFile, DatabaseToUse);
             });
         }
 
@@ -615,7 +626,7 @@ namespace PillowSharp.Client
                 throw new PillowException($"Unable to find file {PathToFile}!");
             DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
             var result = JSONHelper.FromJSON<CouchDocumentChange>(
-                RequestHelper.UploadFile(Document.ID, AttachmentName, 
+                RequestHelper.UploadFile(Document.ID, AttachmentName,
                                          Document.Rev, DatabaseToUse, PathToFile));
             if (result.Ok)
             {
@@ -633,9 +644,11 @@ namespace PillowSharp.Client
         /// <param name="AttachmentName">Name of the attachment to download</param>
         /// <param name="DatabaseToUse">Optional, Database for this request</param>
         /// <returns></returns>
-        public Task<byte[]> GetAttachementAsync<T>(T Document, string AttachmentName, string DatabaseToUse = null) where T : CouchDocument{
-            return Task.Factory.StartNew( () => {
-               return GetAttachement<T>(Document,AttachmentName,DatabaseToUse); 
+        public Task<byte[]> GetAttachementAsync<T>(T Document, string AttachmentName, string DatabaseToUse = null) where T : CouchDocument
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return GetAttachement<T>(Document, AttachmentName, DatabaseToUse);
             });
         }
 
@@ -660,7 +673,7 @@ namespace PillowSharp.Client
             return response.RawBytes;
         }
 
-         /// <summary>
+        /// <summary>
         /// Delete an attachment from a document
         /// </summary>
         /// <typeparam name="T">Document type to use</typeparam>
@@ -668,9 +681,11 @@ namespace PillowSharp.Client
         /// <param name="AttributeName">Name of the attachment</param>
         /// <param name="DatabaseToUse">Optional, Database for this request</param>
         /// <returns></returns>
-        public Task<CouchDocumentChange> DeleteAttachmentAsync<T>(T Document, string AttributeName, string DatabaseToUse = null) where T : CouchDocument{
-            return Task.Factory.StartNew(() => {
-                return DeleteAttachment<T>(Document,AttributeName,DatabaseToUse);
+        public Task<CouchDocumentChange> DeleteAttachmentAsync<T>(T Document, string AttributeName, string DatabaseToUse = null) where T : CouchDocument
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return DeleteAttachment<T>(Document, AttributeName, DatabaseToUse);
             });
         }
 
@@ -686,7 +701,7 @@ namespace PillowSharp.Client
         {
             DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
             Authenticate();
-            var result = JSONHelper.FromJSON<CouchDocumentChange>( 
+            var result = JSONHelper.FromJSON<CouchDocumentChange>(
                                     RequestHelper.DeleteFile(Document.ID, AttributeName, Document.Rev, DatabaseToUse));
             if (result.Ok)
             {
@@ -715,8 +730,9 @@ namespace PillowSharp.Client
         /// <returns></returns>
         public Task<CouchDocumentResponse<T>> GetViewAsync<T>(string DocumentID, string ViewName, KeyValuePair<string, object>[] QueryParameter = null, string DatabaseToUse = null) where T : new()
         {
-            return Task.Factory.StartNew(() => {
-                return GetView<T>(DocumentID,ViewName,QueryParameter,DatabaseToUse);
+            return Task.Factory.StartNew(() =>
+            {
+                return GetView<T>(DocumentID, ViewName, QueryParameter, DatabaseToUse);
             });
         }
 
@@ -738,7 +754,7 @@ namespace PillowSharp.Client
                 RequestHelper.View(DatabaseToUse, DocumentID, ViewName, QueryParameter, HttpRequestMethod.GET, null));
         }
 
-/// <summary>
+        /// <summary>
         /// Run a filter view 
         /// </summary>
         /// <typeparam name="T">Document type for view</typeparam>
@@ -748,9 +764,11 @@ namespace PillowSharp.Client
         /// <param name="QueryParameter">Optional query parameter for the view</param>
         /// <param name="DatabaseToUse">Optional, Database for this request</param>
         /// <returns></returns>
-        public Task<CouchDocumentResponse<T>> FilterViewAsync<T>(string DocumentID, string ViewName, CouchViewFilter ViewFilter, KeyValuePair<string, object>[] QueryParameter = null, string DatabaseToUse = null) where T : new(){
-            return Task.Factory.StartNew( () => {
-                return FilterView<T>(DocumentID,ViewName,ViewFilter,QueryParameter,DatabaseToUse);
+        public Task<CouchDocumentResponse<T>> FilterViewAsync<T>(string DocumentID, string ViewName, CouchViewFilter ViewFilter, KeyValuePair<string, object>[] QueryParameter = null, string DatabaseToUse = null) where T : new()
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return FilterView<T>(DocumentID, ViewName, ViewFilter, QueryParameter, DatabaseToUse);
             });
         }
 
@@ -770,20 +788,41 @@ namespace PillowSharp.Client
             Authenticate();
             DocumentID = EnsureDocumentIDIsValidDesignDocumentID(DocumentID);
             return JSONHelper.FromJSON<CouchDocumentResponse<T>>(
-                RequestHelper.View(DatabaseToUse, DocumentID, ViewName, 
-                                   QueryParameter, HttpRequestMethod.POST, 
+                RequestHelper.View(DatabaseToUse, DocumentID, ViewName,
+                                   QueryParameter, HttpRequestMethod.POST,
                                    JSONHelper.ToJSON(ViewFilter)));
         }
+        //TODO Refactor the Calls to the GetDBToUserForRequest and Authenticate in each function to asingle call 
 
+        public Task<T> RunUpdateFunctionAsync<T>(string DesignDocumentID, string UpdateFunctionName, string DatabaseToUse = null, KeyValuePair<string, object>[] QueryParameter = null){
+            return Task.Factory.StartNew(() =>{
+                return RunUpdateFunction<T>(DesignDocumentID,UpdateFunctionName,DatabaseToUse,QueryParameter);
+            });
+        }
+
+        public T RunUpdateFunction<T>(string DesignDocumentID, string UpdateFunctionName, string DatabaseToUse = null, KeyValuePair<string, object>[] QueryParameter = null) 
+        {
+            DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse); 
+            Authenticate();
+            var response = RequestHelper.Put(RequestHelper.BuildURL(DatabaseToUse, 
+                                            EnsureDocumentIDIsValidDesignDocumentID(DesignDocumentID),
+                                            CouchEntryPoints.UpdateFunction,
+                                            UpdateFunctionName),QueryParameter:QueryParameter);
+           
+            return  (T)Convert.ChangeType(response.Content, typeof(T));
+            
+        }
         /// <summary>
         /// Get a design document
         /// </summary>
         /// <param name="DocumentID">ID of the desgin document</param>
         /// <param name="DatabaseToUse">Optional, Database for this request</param>
         /// <returns></returns>
-        public Task<CouchDesignDocument> GetDesignDocumentAsync(string DocumentID, string DatabaseToUse = null){
-            return Task.Factory.StartNew(() => {
-               return GetDesignDocument(DocumentID,DatabaseToUse); 
+        public Task<CouchDesignDocument> GetDesignDocumentAsync(string DocumentID, string DatabaseToUse = null)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return GetDesignDocument(DocumentID, DatabaseToUse);
             });
         }
 
@@ -808,9 +847,11 @@ namespace PillowSharp.Client
         /// <param name="DesignDocument">The desgin document to use</param>
         /// <param name="DatabaseToUse">Optional, Database for this request</param>
         /// <returns></returns>
-        public Task<CouchDocumentChange> UpsertDesignDocumentAsync(CouchDesignDocument DesignDocument, string DatabaseToUse = null){
-            return Task.Factory.StartNew(() => {
-                return UpsertDesignDocument(DesignDocument,DatabaseToUse);
+        public Task<CouchDocumentChange> UpsertDesignDocumentAsync(CouchDesignDocument DesignDocument, string DatabaseToUse = null)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return UpsertDesignDocument(DesignDocument, DatabaseToUse);
             });
         }
 
@@ -841,15 +882,17 @@ namespace PillowSharp.Client
             }
             return result;
         }
-         /// <summary>
+        /// <summary>
         /// Gets you the current Revision of the document in CouchDB
         /// </summary>
         /// <param name="DocumentID">Document to check</param>
         /// <param name="DatabaseToUse">Optional, Database for this request</param>
         /// <returns></returns>
-        public Task<string> GetCurrentDocumentRevisionAsync(string DocumentID, Type CouchDocumentType = null, string DatabaseToUse = null){
-            return Task.Factory.StartNew(() => {
-                return GetCurrentDocumentRevision(DocumentID,CouchDocumentType,DatabaseToUse);
+        public Task<string> GetCurrentDocumentRevisionAsync(string DocumentID, Type CouchDocumentType = null, string DatabaseToUse = null)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return GetCurrentDocumentRevision(DocumentID, CouchDocumentType, DatabaseToUse);
             });
         }
 

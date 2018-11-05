@@ -13,5 +13,10 @@ namespace PillowSharp.CouchType
         public string Error { get; set; }
         [JsonProperty("reason")]
         public string Reason { get; set; } 
+
+        public override string ToString()
+        {
+            return Reason;
+        }
     }
 }

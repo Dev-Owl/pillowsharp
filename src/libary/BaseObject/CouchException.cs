@@ -8,11 +8,12 @@ namespace PillowSharp.BaseObject
     {
         public CouchError Error { get; set; }
 
-        public CouchException(CouchError Error)
+        public CouchException(CouchError Error) : base(message:Error?.ToString())
         {
             this.Error = Error;
             if (Error != null)
                 Console.WriteLine(this.ToString());
+            
         }
 
         public override string ToString(){

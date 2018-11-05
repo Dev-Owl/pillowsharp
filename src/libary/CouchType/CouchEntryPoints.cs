@@ -11,4 +11,6 @@ public static class CouchEntryPoints
         
         public const string DesignDoc ="_design";
         public const string ViewDoc ="_view";
+
+        public const string UpdateFunction ="_update";
 }

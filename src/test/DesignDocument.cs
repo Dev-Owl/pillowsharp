@@ -35,6 +35,7 @@ namespace test
             designDoc.ID="testDesignDoc";
             designDoc.AddView("test","function (doc) {emit(doc._id, 1);}");
             designDoc.AddView("testReduce","function (doc) {emit(doc._id, 1);}","_count");
+            designDoc.AddUpdate("testupdate","function(document,request){return [null, 'Edited World!'];}");
             var result = await client.UpsertDesignDocumentAsync(designDoc);
             Assert.True(result.Ok);
             Assert.True(!string.IsNullOrEmpty(designDoc.Rev),"Revision was not set during creation");
@@ -80,6 +81,14 @@ namespace test
             var result = await client.GetViewAsync<dynamic>(LastDesignDoc.ID,"test",new[] {new KeyValuePair<string, object>("reduce","false")});
             Assert.True(result != null,"Result was null, expected data");
             //TODO extend this test
+        }
+
+        [Fact]
+        public void TestUpdateFunction(){
+            _CreateDesign().Wait();
+             var client = GetTestClient();
+             var result = client.RunUpdateFunction<string>(LastDesignDoc.ID,"testupdate");
+             Assert.NotEmpty(result);
         }
 
         public void FilterViewDesign()

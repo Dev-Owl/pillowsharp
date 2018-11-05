@@ -51,13 +51,13 @@ namespace test
         }
         public static async Task ListDB(){
             Console.WriteLine("DB on server:");
-            var dbs = await client.GetListOfAllDatabases();
+            var dbs = await client.GetListOfAllDatabasesAsync();
             dbs.ForEach(db => Console.WriteLine($"Found DB {db}"));
         }
 
         public static async Task GetUUIDS(){
             Console.WriteLine("Lets get 10 UUIDS from couch server");
-            var uuidResponse = await client.GetManyUUIDs(AmountOfUUIDs:10);
+            var uuidResponse = await client.GetManyUUIDsAsync(AmountOfUUIDs:10);
             foreach(var id in uuidResponse.UUIDS){
                 Console.WriteLine(id);
             }
@@ -66,9 +66,9 @@ namespace test
         public static async Task CreateDB()
         {
             Console.WriteLine("Creating DB pillow");
-            if(!await client.DbExists("pillow"))
+            if(!await client.DbExistsAsync("pillow"))
             {
-                if( await client.CreateNewDatabase("pillow"))
+                if( await client.CreateNewDatabaseAsync("pillow"))
                     Console.WriteLine("Database pillow created");
             }
             else
@@ -80,7 +80,7 @@ namespace test
         public static async Task AddDocuments(){
             Console.WriteLine("Adding document to pillow");
             person = new Person(){Name="Christian",LastName="Muehle",Role="Developer" };
-            var result = await client.CreateANewDocument(person);
+            var result = await client.CreateANewDocumentAsync(person);
             if(result.Ok)
             {
                 Console.WriteLine($"Document created with id:{result.ID} and Rev:{result.Rev}");
@@ -90,7 +90,7 @@ namespace test
         private static async Task UploadFileToDocument()
         {
             Console.WriteLine("Uploading sleepy owl");
-            var result =  await client.AddAttachment(person.CouchDocument,"fav.image","sleepy_owl.JPG");
+            var result =  await client.AddAttachmentAsync(person.CouchDocument,"fav.image","sleepy_owl.JPG");
             if(result.Ok){
                 Console.WriteLine("Attachment added");
                 person.CouchDocument = result.ToCouchDocument();
@@ -100,13 +100,13 @@ namespace test
         public static async Task GetFileFromDocument()
         {
              Console.WriteLine("Downloading sleepy owl");
-            var result =  await client.GetAttachement(person.CouchDocument,"fav.image");
+            var result =  await client.GetAttachementAsync(person.CouchDocument,"fav.image");
             Console.WriteLine($"Got the file back, file has {result.Count()} bytes");
         }
 
         public static async Task DeleteFileFromDocument()
         {
-            var result =  await client.DeleteAttachment(person.CouchDocument,"fav.image");
+            var result =  await client.DeleteAttachmentAsync(person.CouchDocument,"fav.image");
             if(result.Ok){
                  Console.WriteLine($"The file is now deleted");
             }
@@ -114,13 +114,13 @@ namespace test
 
         public static async Task GetDocuments(){
             Console.WriteLine("Get documents from pillow");
-            var result = await client.GetDocument<Person>(person.CouchDocument.ID);
+            var result = await client.GetDocumentAsync<Person>(person.CouchDocument.ID);
             Console.WriteLine(result.ToString());
         }
         
         public static async Task DeleteDocument(){
             Console.WriteLine("Deleting document from pillow");
-            var result = await client.DeleteDocument(person.CouchDocument);
+            var result = await client.DeleteDocumentAsync(person.CouchDocument);
             if(result.Ok){
                 Console.WriteLine("Document deleted");
             }

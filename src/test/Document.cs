@@ -18,7 +18,7 @@ namespace test
 
         public DocumentTests():base("pillowtest_doc")
         {
-            GetTestClient().CreateNewDatabase(this.TestDB).Wait();
+            GetTestClient().CreateNewDatabaseAsync(this.TestDB).Wait();
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace test
         {
             var testDoc = TestDocument.GenerateTestObject();
             var client = CouchSettings.GetTestClient(Database);
-            var result = await client.CreateANewDocument(testDoc,DatabaseToCreateDocumentIn:Database); 
+            var result = await client.CreateANewDocumentAsync(testDoc,DatabaseToCreateDocumentIn:Database); 
             //Ensure all needed parts are set by the client
             Assert.True(result.Ok,"Error during document creation");
             Assert.False(string.IsNullOrEmpty( testDoc.ID ),"ID was not set for new document");
@@ -55,7 +55,7 @@ namespace test
         {
             //get all
             PillowClient client = GetTestClient();
-            var result = await client.GetAllDocuments(DatabaseToUse: this.TestDB);
+            var result = await client.GetAllDocumentsAsync(DatabaseToUse: this.TestDB);
             Assert.True(result !=null,"No result from couch db");
             Assert.True(result.TotalRows > 0,"No documents returned, expected >=1");
             Assert.True(result.Rows?.Count == result.TotalRows,"Total rows where not equal returned rows!");
@@ -64,10 +64,10 @@ namespace test
             Assert.False(string.IsNullOrEmpty( firstDocument.ID),"Document id was null or empty");
             Assert.False(string.IsNullOrEmpty( firstDocument.Value.Revision),"Document rev was null or empty");
             //Get single docu, latest rev
-            var singleDoc = await client.GetDocument<TestDocument>(firstDocument.ID);
+            var singleDoc = await client.GetDocumentAsync<TestDocument>(firstDocument.ID);
             Assert.True(singleDoc.AllSet(),"Missing values in created document!");
             //Get with rev number
-            var singleDocRev = await client.GetDocument<TestDocument>(singleDoc.ID,singleDoc.Rev);
+            var singleDocRev = await client.GetDocumentAsync<TestDocument>(singleDoc.ID,singleDoc.Rev);
             Assert.True(singleDoc.Equals(singleDocRev),"Documents are differnt but should be the same");
         }
 
@@ -82,7 +82,7 @@ namespace test
         private async Task Deletedocument(){
             var client = GetTestClient();
             var prevRevision = LastDocument.Rev;
-            var result = await client.DeleteDocument<TestDocument>(LastDocument);
+            var result = await client.DeleteDocumentAsync<TestDocument>(LastDocument);
             Assert.NotNull(result);
             Assert.True(result.Ok,"Delete document returned false");
             Assert.True(LastDocument.Deleted,"Delete flag is not true");
@@ -99,12 +99,12 @@ namespace test
             var prevText = LastDocument.StringProp;
             var lastRev = LastDocument.Rev;
             LastDocument.StringProp ="Luke, I'm your father!";
-            var result = await client.UpdateDocument<TestDocument>(LastDocument);
+            var result = await client.UpdateDocumentAsync<TestDocument>(LastDocument);
             Assert.True(result.Ok,"Update document returned false");
             Assert.True(result.ID == LastDocument.ID,"ID of updated document where not the same!");
             Assert.True(result.Rev == LastDocument.Rev,"Revision number of result is not the same as for the test document");
             Assert.False(lastRev == LastDocument.Rev,"Revision number was not changed");
-            var dbObj = await client.GetDocument<TestDocument>(LastDocument.ID,LastDocument.Rev);
+            var dbObj = await client.GetDocumentAsync<TestDocument>(LastDocument.ID,LastDocument.Rev);
             Assert.False(dbObj.StringProp == prevText,"document wasnt updated as expected!");
         }
         [Fact]
@@ -121,7 +121,7 @@ namespace test
             LastDocument.StringProp ="Luke, I'm your father!";
             
             var documentList = new List<TestDocument>(){ TestDocument.GenerateTestObject(), TestDocument.GenerateTestObject(), LastDocument};
-            var result = await client.UpdateDocuments(documentList);
+            var result = await client.UpdateDocumentsAsync(documentList);
             Assert.True(result.Count() == documentList.Count,"Result list was not the same length as document list");
             Assert.True(documentList.All(d => !string.IsNullOrEmpty(d.ID)),"Not all IDs where set as expected");
             Assert.True(documentList.All(d => !string.IsNullOrEmpty(d.Rev)),"Not all revs where set as expected");
@@ -129,7 +129,7 @@ namespace test
             var changedDocResult = result.FirstOrDefault(r => r.ID == LastDocument.ID);
             Assert.NotNull(changedDocResult);
             Assert.True( changedDocResult.Rev == LastDocument.Rev,"Revision number missmatch");
-            var dbObj = await client.GetDocument<TestDocument>(LastDocument.ID,LastDocument.Rev);
+            var dbObj = await client.GetDocumentAsync<TestDocument>(LastDocument.ID,LastDocument.Rev);
             Assert.False(dbObj.StringProp == prevText,"document wasnt updated as expected!");
         }
 
@@ -144,7 +144,7 @@ namespace test
         }
         private async Task _AddAttachment(string File){
             var client = GetTestClient();
-            var result =  await client.AddAttachment(LastDocument,File,"test.txt");
+            var result =  await client.AddAttachmentAsync(LastDocument,File,"test.txt");
             Assert.True(result.Ok,"Add attachment failed");
             Assert.True(result.Rev == LastDocument.Rev,"Revision was not updated");
         }
@@ -174,7 +174,7 @@ namespace test
         {
             var expectedSize = File.ReadAllBytes(FilePath);
             var client = GetTestClient();
-            var result =  await client.GetAttachement(LastDocument,"test.txt");
+            var result =  await client.GetAttachementAsync(LastDocument,"test.txt");
             Assert.True(expectedSize.Count() == result.Count(),"File size is different");
         }
 
@@ -214,14 +214,14 @@ namespace test
         private async Task _DeleteAttachment()
         {
              var client = GetTestClient();
-            var result = await client.DeleteAttachment(LastDocument,"test.txt");
+            var result = await client.DeleteAttachmentAsync(LastDocument,"test.txt");
              Assert.True(result.Ok,"Returned result was not true");
              Assert.True(result.Rev == LastDocument.Rev,"Revision was not updated as expected");
         }
 
         public void Dispose()
         {
-            GetTestClient().DeleteDatbase(this.TestDB).Wait();
+            GetTestClient().DeleteDatbaseAsync(this.TestDB).Wait();
         }
         [Fact]
         public void TestBaseDocumentProperties()
@@ -243,7 +243,7 @@ namespace test
         private async Task _TestDocumentHead()
         {
             var client = GetTestClient();
-            var result = await client.GetCurrentDocumentRevision(LastDocument.ID, LastDocument.GetType());
+            var result = await client.GetCurrentDocumentRevisionAsync(LastDocument.ID, LastDocument.GetType());
             Assert.NotNull(result);
             Assert.Equal(LastDocument.Rev, result);
         }
@@ -251,7 +251,7 @@ namespace test
         private async Task CheckBasicProperties()
         {
             var client = GetTestClient();
-            var documentFromDB = await client.GetDocument<TestDocument>(LastDocument.ID);
+            var documentFromDB = await client.GetDocumentAsync<TestDocument>(LastDocument.ID);
             Assert.NotNull(documentFromDB.ID);
             Assert.NotNull(documentFromDB.Rev);
             Assert.False(documentFromDB.Deleted);

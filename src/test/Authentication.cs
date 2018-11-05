@@ -29,13 +29,13 @@ namespace test
             if(!CouchSettings.SkipAuthTests)
             {
                 var client = GetTestClient();
-                client.DeleteDatbase(this.TestDB).Wait();
+                client.DeleteDatbaseAsync(this.TestDB).Wait();
             }
         }
 
         private async Task LoginCreateDB(ELoginTypes Type){
             var client = GetTestClient(Type);
-            var result = await client.CreateNewDatabase(this.TestDB);
+            var result = await client.CreateNewDatabaseAsync(this.TestDB);
             Assert.True(result,$"Unable to create the db, with {Type.ToString("G")}");
         }   
 

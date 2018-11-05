@@ -18,7 +18,7 @@ namespace test
 
         public DesignDocumentTests():base("pillowtest_designdoc")
         {
-            GetTestClient().CreateNewDatabase(this.TestDB).Wait();
+            GetTestClient().CreateNewDatabaseAsync(this.TestDB).Wait();
         }
 
         [Fact]
@@ -35,7 +35,7 @@ namespace test
             designDoc.ID="testDesignDoc";
             designDoc.AddView("test","function (doc) {emit(doc._id, 1);}");
             designDoc.AddView("testReduce","function (doc) {emit(doc._id, 1);}","_count");
-            var result = await client.UpsertDesignDocument(designDoc);
+            var result = await client.UpsertDesignDocumentAsync(designDoc);
             Assert.True(result.Ok);
             Assert.True(!string.IsNullOrEmpty(designDoc.Rev),"Revision was not set during creation");
             Assert.True(designDoc.ID.StartsWith(CouchEntryPoints.DesignDoc),"New created design document doesnt start with _design");
@@ -52,7 +52,7 @@ namespace test
             await _CreateDesign();
             Assert.True(LastDesignDoc != null,"No document created during CreateDesign");
             var client = GetTestClient();
-            var dbDocument = await client.GetDesignDocument(LastDesignDoc.ID);
+            var dbDocument = await client.GetDesignDocumentAsync(LastDesignDoc.ID);
             Assert.True(dbDocument != null,"Unable to get design from DB");
             Assert.True(dbDocument.ID == LastDesignDoc.ID,"ID is different as expected!");
             Assert.True(dbDocument.Rev == LastDesignDoc.Rev,"Revision is different as expected");
@@ -77,7 +77,7 @@ namespace test
             await _CreateDesign();
             var testDoc = await DocumentTests.CreateTestDocument(this.TestDB);//create a doc in design test db            
             var client = GetTestClient();
-            var result = await client.GetView<dynamic>(LastDesignDoc.ID,"test",new[] {new KeyValuePair<string, object>("reduce","false")});
+            var result = await client.GetViewAsync<dynamic>(LastDesignDoc.ID,"test",new[] {new KeyValuePair<string, object>("reduce","false")});
             Assert.True(result != null,"Result was null, expected data");
             //TODO extend this test
         }
@@ -90,7 +90,7 @@ namespace test
 
         public void Dispose()
         {
-            GetTestClient().DeleteDatbase(this.TestDB).Wait();
+            GetTestClient().DeleteDatbaseAsync(this.TestDB).Wait();
         }
     }
 }

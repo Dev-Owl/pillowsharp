@@ -794,20 +794,21 @@ namespace PillowSharp.Client
         }
         //TODO Refactor the Calls to the GetDBToUserForRequest and Authenticate in each function to asingle call 
 
-        public Task<T> RunUpdateFunctionAsync<T>(string DesignDocumentID, string UpdateFunctionName, string DatabaseToUse = null, KeyValuePair<string, object>[] QueryParameter = null){
+        public Task<T> RunUpdateFunctionAsync<T>(string DesignDocumentID, string UpdateFunctionName,string DocumentID ="", string DatabaseToUse = null, KeyValuePair<string, object>[] QueryParameter = null){
             return Task.Factory.StartNew(() =>{
-                return RunUpdateFunction<T>(DesignDocumentID,UpdateFunctionName,DatabaseToUse,QueryParameter);
+                return RunUpdateFunction<T>(DesignDocumentID,UpdateFunctionName,DocumentID,DatabaseToUse,QueryParameter);
             });
         }
 
-        public T RunUpdateFunction<T>(string DesignDocumentID, string UpdateFunctionName, string DatabaseToUse = null, KeyValuePair<string, object>[] QueryParameter = null) 
+        public T RunUpdateFunction<T>(string DesignDocumentID, string UpdateFunctionName,string DocumentID ="", string DatabaseToUse = null, KeyValuePair<string, object>[] QueryParameter = null) 
         {
             DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse); 
             Authenticate();
             var response = RequestHelper.Put(RequestHelper.BuildURL(DatabaseToUse, 
                                             EnsureDocumentIDIsValidDesignDocumentID(DesignDocumentID),
                                             CouchEntryPoints.UpdateFunction,
-                                            UpdateFunctionName),QueryParameter:QueryParameter);
+                                            UpdateFunctionName,
+                                            DocumentID),QueryParameter:QueryParameter);
            
             return  (T)Convert.ChangeType(response.Content, typeof(T));
             

@@ -306,6 +306,75 @@ namespace PillowSharp.Client
             Authenticate();
             return JSONHelper.FromJSON<CouchConfirm>(RequestHelper.Delete(Name))?.Ok ?? false;
         }
+
+        /// <summary>
+        /// Runs the provided query against a database
+        /// </summary>
+        /// <param name="query">Mango query to execute</param>
+        /// <param name="database">Override any other db set for this client and run query on this db</param>
+        /// <typeparam name="T">Type that is requested by the query</typeparam>
+        /// <returns>Result of the query</returns>
+        public Task<MangoQueryResult<T>> RunMangoQueryAsync<T>(MangoQuery query, string database=null) where T : new()
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return this.RunMangoQuery<T>(query, database);
+            });
+        }
+
+        /// <summary>
+        /// Runs the provided query against a database
+        /// </summary>
+        /// <param name="query">Mango query to execute</param>
+        /// <param name="database">Override any other db set for this client and run query on this db</param>
+        /// <typeparam name="T">Type that is requested by the query</typeparam>
+        /// <returns>Result of the query</returns>
+        public MangoQueryResult<T> RunMangoQuery<T>(MangoQuery query, string database=null) where T : new()
+        {
+            if (query == null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
+            //Ensure the query is at least following the rules, still open to fail later...
+            query.Validate();
+            var databaseForQuery = GetDBToUseForRequest(null, database);
+            //Create token if needed
+            Authenticate();
+            var response = HttpPost(RequestHelper.BuildURL(databaseForQuery, CouchEntryPoints.MangoQuery), JSONHelper.ToJSON(query));
+            return FromResponse<MangoQueryResult<T>>(response);
+        }
+
+        /// <summary>
+        /// Create an index for Mango Queries
+        /// </summary>
+        /// <param name="newIndex">Details about the index</param>
+        /// <param name="database">Database to use</param>
+        /// <returns>State of the request</returns>
+        public MangoIndexResponse CreateMangoIndex(MangoIndex newIndex, string database=null)
+        {
+            if (newIndex == null)
+            {
+                throw new ArgumentNullException(nameof(newIndex));
+            }
+            var databaseForQuery = GetDBToUseForRequest(null, database);
+            //Create token if needed
+            Authenticate();
+            var response = HttpPost(RequestHelper.BuildURL(databaseForQuery, CouchEntryPoints.MangoIndex), JSONHelper.ToJSON(newIndex));
+            return FromResponse<MangoIndexResponse>(response);
+        }
+
+        /// <summary>
+        /// Create an index for Mango Queries
+        /// </summary>
+        /// <param name="newIndex">Details about the index</param>
+        /// <param name="database">Database to use</param>
+        /// <returns>State of the request</returns>
+        public Task<MangoIndexResponse> CreateMangoIndexAsync(MangoIndex newIndex,string database=null){
+            return Task.Factory.StartNew(() => {
+                return CreateMangoIndex(newIndex,database);
+            });
+        }
+
         #endregion
 
         #region Document Functions
@@ -794,24 +863,26 @@ namespace PillowSharp.Client
         }
         //TODO Refactor the Calls to the GetDBToUserForRequest and Authenticate in each function to asingle call 
 
-        public Task<T> RunUpdateFunctionAsync<T>(string DesignDocumentID, string UpdateFunctionName,string DocumentID ="", string DatabaseToUse = null, KeyValuePair<string, object>[] QueryParameter = null){
-            return Task.Factory.StartNew(() =>{
-                return RunUpdateFunction<T>(DesignDocumentID,UpdateFunctionName,DocumentID,DatabaseToUse,QueryParameter);
+        public Task<T> RunUpdateFunctionAsync<T>(string DesignDocumentID, string UpdateFunctionName, string DocumentID = "", string DatabaseToUse = null, KeyValuePair<string, object>[] QueryParameter = null)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return RunUpdateFunction<T>(DesignDocumentID, UpdateFunctionName, DocumentID, DatabaseToUse, QueryParameter);
             });
         }
 
-        public T RunUpdateFunction<T>(string DesignDocumentID, string UpdateFunctionName,string DocumentID ="", string DatabaseToUse = null, KeyValuePair<string, object>[] QueryParameter = null) 
+        public T RunUpdateFunction<T>(string DesignDocumentID, string UpdateFunctionName, string DocumentID = "", string DatabaseToUse = null, KeyValuePair<string, object>[] QueryParameter = null)
         {
-            DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse); 
+            DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
             Authenticate();
-            var response = RequestHelper.Put(RequestHelper.BuildURL(DatabaseToUse, 
+            var response = RequestHelper.Put(RequestHelper.BuildURL(DatabaseToUse,
                                             EnsureDocumentIDIsValidDesignDocumentID(DesignDocumentID),
                                             CouchEntryPoints.UpdateFunction,
                                             UpdateFunctionName,
-                                            DocumentID),QueryParameter:QueryParameter);
-           
-            return  (T)Convert.ChangeType(response.Content, typeof(T));
-            
+                                            DocumentID), QueryParameter: QueryParameter);
+
+            return (T)Convert.ChangeType(response.Content, typeof(T));
+
         }
         /// <summary>
         /// Get a design document

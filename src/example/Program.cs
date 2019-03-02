@@ -8,6 +8,7 @@ using PillowSharp.CouchType;
 using Newtonsoft.Json;
 using System.IO;
 using System.Text;
+using System.Collections.Generic;
 
 namespace test
 {
@@ -18,14 +19,15 @@ namespace test
         public static Person person = null;
         static void Main(string[] args)
         {
-          Work().Wait(); // run the test case
-          Console.WriteLine("Example completed, press enter to exit");
-          Console.ReadLine();
+            Work().Wait(); // run the test case
+            Console.WriteLine("Example completed, press enter to exit");
+            Console.ReadLine();
         }
 
-        public static async Task Work(){
+        public static async Task Work()
+        {
             Console.WriteLine("Hello World, its Pillow#!");
-            client = new PillowClient(new BasicCouchDBServer("http://127.0.0.1:5984",new CouchLoginData("admin","admin"),ELoginTypes.TokenLogin));
+            client = new PillowClient(new BasicCouchDBServer("http://127.0.0.1:5984", new CouchLoginData("admin", "admin"), ELoginTypes.BasicAuth));
             try
             {
                 await ListDB();
@@ -36,29 +38,103 @@ namespace test
                 await GetFileFromDocument();
                 await DeleteFileFromDocument();
                 await GetDocuments();
+                await QueryDb();
                 await DeleteDocument();
+                
             }
-            catch(PillowException pEx){
+            catch (PillowException pEx)
+            {
                 Console.WriteLine($"Error in pillow#:{pEx.Message}");
             }
-            catch(CouchException cEx){
+            catch (CouchException cEx)
+            {
                 Console.WriteLine($"Error in couchdb:{cEx.ToString()}");
             }
-            catch(Exception ex){
+            catch (Exception ex)
+            {
                 Console.WriteLine($"Generic error: {ex.Message}");
             }
-            
+
         }
-        public static async Task ListDB(){
+
+        private class QueryPerson{
+            public string LastName { get; set; }
+
+            public string Role { get; set; }
+
+             public new string ToString()
+            {
+                return $"Hello my name is {LastName} and Im working as {Role}";
+            }
+        }
+
+        private static async Task QueryDb()
+        {
+             Console.WriteLine("Running MangoQuery against the db");
+             var query = new MangoQuery(){
+                 FilteringFields = new List<string>(){
+                     "LastName","Role"
+                 },
+                 Selector = new MangoSelector(){
+                     Operations = new List<MangoSelectorOperator>(){
+                         new MangoSelectorOperator("$or"){
+                             OperatorValues = new List<MangoSelectorOperator>(){
+                                 new MangoSelectorOperator("LastName"){
+                                     SimpleOperatorValue = "Muehle"
+                                 },
+                                 new MangoSelectorOperator("LastName"){
+                                     SimpleOperatorValue = "NotFound"
+                                 }
+                             }
+                         }
+                     }
+                 },
+                 IncludeExecutionStats = true
+             };
+             await RunQuery(query);
+             Console.WriteLine("Generating index for above query");
+             var indexResult = await client.CreateMangoIndexAsync(new MangoIndex(){
+                 DesignDocument ="index_collection",
+                 Name = "example_index_lastname",
+                 Index = new MangoIndexFields(){
+                     Fields = new List<string>(){
+                         "LastName"
+                     }
+                 },
+             },"pillow");
+             Console.WriteLine($"Index result: {indexResult.Result}");
+             query.UseIndex = new List<string>(){
+                 "index_collection"
+             };
+             Console.WriteLine($"Running query again");
+             await RunQuery(query);
+        }
+
+        private static async Task RunQuery(MangoQuery query){
+             var queryResult = await client.RunMangoQueryAsync<QueryPerson>(query,"pillow");
+             Console.WriteLine("Query results:");
+             Console.WriteLine($"Total docs: {queryResult.Docs.Count}");
+             Console.WriteLine($"Warning: {queryResult.Warning}");
+             Console.WriteLine($"ExecutionTimeMs: {queryResult.ExecutionStats?.ExecutionTimeMs}");
+             foreach (var item in queryResult.Docs)
+             {
+                  Console.WriteLine(item.ToString());
+             }
+        }
+
+        public static async Task ListDB()
+        {
             Console.WriteLine("DB on server:");
             var dbs = await client.GetListOfAllDatabasesAsync();
             dbs.ForEach(db => Console.WriteLine($"Found DB {db}"));
         }
 
-        public static async Task GetUUIDS(){
+        public static async Task GetUUIDS()
+        {
             Console.WriteLine("Lets get 10 UUIDS from couch server");
-            var uuidResponse = await client.GetManyUUIDsAsync(AmountOfUUIDs:10);
-            foreach(var id in uuidResponse.UUIDS){
+            var uuidResponse = await client.GetManyUUIDsAsync(AmountOfUUIDs: 10);
+            foreach (var id in uuidResponse.UUIDS)
+            {
                 Console.WriteLine(id);
             }
             Console.WriteLine("Easy as cake");
@@ -66,22 +142,23 @@ namespace test
         public static async Task CreateDB()
         {
             Console.WriteLine("Creating DB pillow");
-            if(!await client.DbExistsAsync("pillow"))
+            if (!await client.DbExistsAsync("pillow"))
             {
-                if( await client.CreateNewDatabaseAsync("pillow"))
+                if (await client.CreateNewDatabaseAsync("pillow"))
                     Console.WriteLine("Database pillow created");
             }
             else
                 Console.WriteLine("Database pillow exists already");
-            
+
             client.ForcedDatabaseName = "pillow"; //Set the db for requests
         }
 
-        public static async Task AddDocuments(){
+        public static async Task AddDocuments()
+        {
             Console.WriteLine("Adding document to pillow");
-            person = new Person(){Name="Christian",LastName="Muehle",Role="Developer" };
+            person = new Person() { Name = "Christian", LastName = "Muehle", Role = "Developer" };
             var result = await client.CreateANewDocumentAsync(person);
-            if(result.Ok)
+            if (result.Ok)
             {
                 Console.WriteLine($"Document created with id:{result.ID} and Rev:{result.Rev}");
                 person.CouchDocument = result.ToCouchDocument();
@@ -90,8 +167,9 @@ namespace test
         private static async Task UploadFileToDocument()
         {
             Console.WriteLine("Uploading sleepy owl");
-            var result =  await client.AddAttachmentAsync(person.CouchDocument,"fav.image","sleepy_owl.JPG");
-            if(result.Ok){
+            var result = await client.AddAttachmentAsync(person.CouchDocument, "fav.image", "sleepy_owl.JPG");
+            if (result.Ok)
+            {
                 Console.WriteLine("Attachment added");
                 person.CouchDocument = result.ToCouchDocument();
             }
@@ -99,38 +177,44 @@ namespace test
 
         public static async Task GetFileFromDocument()
         {
-             Console.WriteLine("Downloading sleepy owl");
-            var result =  await client.GetAttachementAsync(person.CouchDocument,"fav.image");
+            Console.WriteLine("Downloading sleepy owl");
+            var result = await client.GetAttachementAsync(person.CouchDocument, "fav.image");
             Console.WriteLine($"Got the file back, file has {result.Count()} bytes");
         }
 
         public static async Task DeleteFileFromDocument()
         {
-            var result =  await client.DeleteAttachmentAsync(person.CouchDocument,"fav.image");
-            if(result.Ok){
-                 Console.WriteLine($"The file is now deleted");
+            var result = await client.DeleteAttachmentAsync(person.CouchDocument, "fav.image");
+            if (result.Ok)
+            {
+                Console.WriteLine($"The file is now deleted");
             }
         }
 
-        public static async Task GetDocuments(){
+        public static async Task GetDocuments()
+        {
             Console.WriteLine("Get documents from pillow");
             var result = await client.GetDocumentAsync<Person>(person.CouchDocument.ID);
             Console.WriteLine(result.ToString());
         }
-        
-        public static async Task DeleteDocument(){
+
+        public static async Task DeleteDocument()
+        {
             Console.WriteLine("Deleting document from pillow");
             var result = await client.DeleteDocumentAsync(person.CouchDocument);
-            if(result.Ok){
+            if (result.Ok)
+            {
                 Console.WriteLine("Document deleted");
             }
         }
 
-        public static void DeleteDatabase(){
+        public static void DeleteDatabase()
+        {
             Console.WriteLine("Delete database pillow");
         }
 
-        public class Person{
+        public class Person
+        {
             public string Name { get; set; }
 
             public string LastName { get; set; }
@@ -139,7 +223,8 @@ namespace test
             [JsonIgnore]
             public CouchDocument CouchDocument { get; set; }
 
-            public new string ToString(){
+            public new string ToString()
+            {
                 return $"Hello my name is {Name} {LastName} and Im working as {Role}";
             }
         }

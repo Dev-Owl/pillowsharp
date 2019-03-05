@@ -14,6 +14,7 @@ using System.Web;
 using pillowsharp.Middleware;
 using pillowsharp.Middleware.Default;
 using pillowsharp.Helper;
+using System.Diagnostics;
 
 namespace PillowSharp.Middleware.Default
 {
@@ -25,6 +26,11 @@ namespace PillowSharp.Middleware.Default
         CookieContainer cookieContainer = null;
         //URI to server, used for Cookie
         Uri serverURI = null;
+
+        //If set call time is traced
+        public bool Trace { get; set; } //TODO add trace to the right places, #endregion
+
+        public Action<TraceInformation> TraceCallBack { get; set; } //TODO call this if trace is true and provide running time in ms
 
         //Create the Middleware and pass server data to it
         public BasicWebRequestHelper(ICouchdbServer Server) : base(Server)
@@ -84,8 +90,23 @@ namespace PillowSharp.Middleware.Default
 
         private pillowsharp.Middleware.RestResponse Request(RestRequest Request)
         {
-
-            return new RestSharpResponse(client.Execute(Request)) as pillowsharp.Middleware.RestResponse;
+            var stopwatch = new Stopwatch();
+            if (Trace)
+            {
+                stopwatch.Start();
+            }
+            var result = new RestSharpResponse(client.Execute(Request)) as pillowsharp.Middleware.RestResponse;
+            if (Trace)
+            {
+                stopwatch.Stop();
+                TraceCallBack?.Invoke(new TraceInformation()
+                {
+                    RequestTimeInMs = stopwatch.ElapsedMilliseconds,
+                    RequestUrl = Request.Resource,
+                    RequestMethod = Request.Method.ToString("g")
+                });
+            }
+            return result;
         }
 
         public override pillowsharp.Middleware.RestResponse GetDocument(string ID, string Database, string Revision = null)
@@ -129,7 +150,7 @@ namespace PillowSharp.Middleware.Default
             return Request(getRequest);
         }
 
-        public override Task<pillowsharp.Middleware.RestResponse> PutAsync(string Url, string Body = null,KeyValuePair<string,object>[] QueryParameter= null)
+        public override Task<pillowsharp.Middleware.RestResponse> PutAsync(string Url, string Body = null, KeyValuePair<string, object>[] QueryParameter = null)
         {
             return Task.Factory.StartNew(() =>
             {
@@ -137,9 +158,9 @@ namespace PillowSharp.Middleware.Default
             });
         }
         //PUT request to the given URL with optional body
-        public override pillowsharp.Middleware.RestResponse Put(string Url, string Body = null,KeyValuePair<string,object>[] QueryParameter= null)
+        public override pillowsharp.Middleware.RestResponse Put(string Url, string Body = null, KeyValuePair<string, object>[] QueryParameter = null)
         {
-            var putRequest = BuildRequestBase(Url, Method.PUT,QueryParameter: QueryParameter);
+            var putRequest = BuildRequestBase(Url, Method.PUT, QueryParameter: QueryParameter);
             if (!string.IsNullOrEmpty(Body))
                 AddJSONBody(putRequest, Body);
             return Request(putRequest);
@@ -254,7 +275,8 @@ namespace PillowSharp.Middleware.Default
         }
         public override Task<pillowsharp.Middleware.RestResponse> HeadAsync(string Uri)
         {
-            return Task.Factory.StartNew(() => {
+            return Task.Factory.StartNew(() =>
+            {
                 return Head(Uri);
             });
         }
@@ -265,15 +287,17 @@ namespace PillowSharp.Middleware.Default
 
         public override Task<pillowsharp.Middleware.RestResponse> GetAsync(string Url)
         {
-           return Task.Factory.StartNew(() => {
-               return this.Get(Url);
-           });
+            return Task.Factory.StartNew(() =>
+            {
+                return this.Get(Url);
+            });
         }
 
         public override Task<pillowsharp.Middleware.RestResponse> GetFileAsync(string ID, string AttachmentName, string Revision, string Database)
         {
-            return Task.Factory.StartNew( () => {
-                return GetFile(ID,AttachmentName,Revision,Database);
+            return Task.Factory.StartNew(() =>
+            {
+                return GetFile(ID, AttachmentName, Revision, Database);
             });
         }
     }

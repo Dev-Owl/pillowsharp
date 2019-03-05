@@ -28,8 +28,14 @@ namespace test
         {
             Console.WriteLine("Hello World, its Pillow#!");
             client = new PillowClient(new BasicCouchDBServer("http://127.0.0.1:5984", new CouchLoginData("admin", "admin"), ELoginTypes.BasicAuth));
+            client.TraceCallback = (traceInfo) => {
+                Console.WriteLine($"Endpoint: {traceInfo.RequestUrl}");
+                Console.WriteLine($"Metho: {traceInfo.RequestMethod}");
+                Console.WriteLine($"Duration(ms): {traceInfo.RequestTimeInMs}");
+            };
             try
             {
+                client.Trace = true;
                 await ListDB();
                 await GetUUIDS();
                 await CreateDB();

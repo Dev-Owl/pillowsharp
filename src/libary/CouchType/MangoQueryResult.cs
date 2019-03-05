@@ -8,7 +8,7 @@ using PillowSharp.BaseObject;
 
 namespace PillowSharp.CouchType
 {
-    public class MangoQueryResult<T> where T : new()
+    public class MangoQueryResult<T>
     {
         [JsonProperty(PropertyName = "docs")]
         public List<T> Docs { get; set; }

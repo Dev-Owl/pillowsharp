@@ -3,14 +3,20 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>PillowSharp</PackageId>
-    <Version>3.0.0</Version>
+    <Version>3.0.2</Version>
     <Authors>Christian Muehle info@devowl.de</Authors>
     <Company>DevOwl</Company>
     <RepositoryUrl>https://github.com/Dev-Owl/pillowsharp</RepositoryUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/Dev-Owl/pillowsharp/master/logo.png</PackageIconUrl>
     <PackageLicenseUrl>https://github.com/Dev-Owl/pillowsharp/blob/master/LICENSE.md</PackageLicenseUrl>
     <Description>Simple and easy to use client for Apache CouchDB</Description>
-    <PackageReleaseNotes>Added support for Mango Queries</PackageReleaseNotes>
+    <PackageReleaseNotes>
+                         V3.X Major feature:
+                         -Added support for Mango Queries
+                         -Added support for tracing 
+                         Patch 0.1:
+                         -Removed a constraint from Mango functions
+    </PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />

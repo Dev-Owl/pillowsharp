@@ -23,7 +23,6 @@ namespace PillowSharp.Client
         public bool UseCouchUUID { get; set; } = false;
 
         public bool IgnoreJSONNull { get; set; } = true;
-
         
     }
 }

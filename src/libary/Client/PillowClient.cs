@@ -59,6 +59,40 @@ namespace PillowSharp.Client
         /// </summary>
         public string ForcedDatabaseName { get; set; }
 
+        private bool trace = false;
+        public bool Trace
+        {
+            get
+            {
+                return trace;
+            }
+            set
+            {
+                trace = value;
+                if (RequestHelper is BasicWebRequestHelper basicWebRequest)
+                {
+                    basicWebRequest.Trace = trace;
+                }
+            }
+        }
+
+        private Action<TraceInformation> traceCallback;
+        public Action<TraceInformation> TraceCallback
+        {
+            get
+            {
+                return traceCallback;
+            }
+            set
+            {
+                traceCallback = value;
+                if (RequestHelper is BasicWebRequestHelper basicWebRequest)
+                {
+                    basicWebRequest.TraceCallBack = value;
+                }
+            }
+        }
+
         //Storage for token shared between instances
         private TokenStorage loginTokenStorage = new TokenStorage();
 
@@ -314,7 +348,7 @@ namespace PillowSharp.Client
         /// <param name="database">Override any other db set for this client and run query on this db</param>
         /// <typeparam name="T">Type that is requested by the query</typeparam>
         /// <returns>Result of the query</returns>
-        public Task<MangoQueryResult<T>> RunMangoQueryAsync<T>(MangoQuery query, string database=null) where T : new()
+        public Task<MangoQueryResult<T>> RunMangoQueryAsync<T>(MangoQuery query, string database = null)
         {
             return Task.Factory.StartNew(() =>
             {
@@ -329,7 +363,7 @@ namespace PillowSharp.Client
         /// <param name="database">Override any other db set for this client and run query on this db</param>
         /// <typeparam name="T">Type that is requested by the query</typeparam>
         /// <returns>Result of the query</returns>
-        public MangoQueryResult<T> RunMangoQuery<T>(MangoQuery query, string database=null) where T : new()
+        public MangoQueryResult<T> RunMangoQuery<T>(MangoQuery query, string database = null)
         {
             if (query == null)
             {
@@ -350,7 +384,7 @@ namespace PillowSharp.Client
         /// <param name="newIndex">Details about the index</param>
         /// <param name="database">Database to use</param>
         /// <returns>State of the request</returns>
-        public MangoIndexResponse CreateMangoIndex(MangoIndex newIndex, string database=null)
+        public MangoIndexResponse CreateMangoIndex(MangoIndex newIndex, string database = null)
         {
             if (newIndex == null)
             {
@@ -369,9 +403,11 @@ namespace PillowSharp.Client
         /// <param name="newIndex">Details about the index</param>
         /// <param name="database">Database to use</param>
         /// <returns>State of the request</returns>
-        public Task<MangoIndexResponse> CreateMangoIndexAsync(MangoIndex newIndex,string database=null){
-            return Task.Factory.StartNew(() => {
-                return CreateMangoIndex(newIndex,database);
+        public Task<MangoIndexResponse> CreateMangoIndexAsync(MangoIndex newIndex, string database = null)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return CreateMangoIndex(newIndex, database);
             });
         }
 

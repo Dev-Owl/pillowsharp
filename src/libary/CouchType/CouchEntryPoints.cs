@@ -17,4 +17,6 @@ public static class CouchEntryPoints
     public const string MangoQuery = "_find";
 
     public const string MangoIndex = "_index";
+
+    public const string List = "_list";
 }

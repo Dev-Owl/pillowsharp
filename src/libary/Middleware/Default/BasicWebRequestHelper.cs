@@ -273,6 +273,13 @@ namespace PillowSharp.Middleware.Default
                 AddJSONBody(viewRequest, Filter);
             return Request(viewRequest);
         }
+
+        public override pillowsharp.Middleware.RestResponse List(string database, string designDocumentId, string listName, string ViewName, KeyValuePair<string, object>[] queryParameter)
+        {
+            var listRequest = BuildRequestBase(BuildURL(database,designDocumentId,CouchEntryPoints.List,listName,ViewName),(Method)HttpRequestMethod.GET, QueryParameter: queryParameter);
+            return Request(listRequest);
+        }
+
         public override Task<pillowsharp.Middleware.RestResponse> HeadAsync(string Uri)
         {
             return Task.Factory.StartNew(() =>

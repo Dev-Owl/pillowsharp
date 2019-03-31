@@ -69,6 +69,8 @@ namespace PillowSharp.Middleware
 
         public abstract RestResponse View(string Database,string DocumentName,string ViewFunctionName,KeyValuePair<string,object>[] QueryParameter, HttpRequestMethod HTTPMethod,string Filter);
 
+        public abstract pillowsharp.Middleware.RestResponse List(string database, string designDocumentId, string filterName, string ViewName, KeyValuePair<string, object>[] queryParameter);
+
         public abstract RestResponse Head(string Uri);
 
 

@@ -28,7 +28,8 @@ namespace test
         {
             Console.WriteLine("Hello World, its Pillow#!");
             client = new PillowClient(new BasicCouchDBServer("http://127.0.0.1:5984", new CouchLoginData("admin", "admin"), ELoginTypes.BasicAuth));
-            client.TraceCallback = (traceInfo) => {
+            client.TraceCallback = (traceInfo) =>
+            {
                 Console.WriteLine($"Endpoint: {traceInfo.RequestUrl}");
                 Console.WriteLine($"Metho: {traceInfo.RequestMethod}");
                 Console.WriteLine($"Duration(ms): {traceInfo.RequestTimeInMs}");
@@ -36,6 +37,7 @@ namespace test
             try
             {
                 client.Trace = true;
+                client.DeleteDatbase("pillow");
                 await ListDB();
                 await GetUUIDS();
                 await CreateDB();
@@ -45,8 +47,9 @@ namespace test
                 await DeleteFileFromDocument();
                 await GetDocuments();
                 await QueryDb();
+                await RunListOnView();
                 await DeleteDocument();
-                
+
             }
             catch (PillowException pEx)
             {
@@ -63,12 +66,15 @@ namespace test
 
         }
 
-        private class QueryPerson{
+
+
+        private class QueryPerson
+        {
             public string LastName { get; set; }
 
             public string Role { get; set; }
 
-             public new string ToString()
+            public new string ToString()
             {
                 return $"Hello my name is {LastName} and Im working as {Role}";
             }
@@ -76,13 +82,15 @@ namespace test
 
         private static async Task QueryDb()
         {
-             Console.WriteLine("Running MangoQuery against the db");
-             var query = new MangoQuery(){
-                 FilteringFields = new List<string>(){
+            Console.WriteLine("Running MangoQuery against the db");
+            var query = new MangoQuery()
+            {
+                FilteringFields = new List<string>(){
                      "LastName","Role"
                  },
-                 Selector = new MangoSelector(){
-                     Operations = new List<MangoSelectorOperator>(){
+                Selector = new MangoSelector()
+                {
+                    Operations = new List<MangoSelectorOperator>(){
                          new MangoSelectorOperator("$or"){
                              OperatorValues = new List<MangoSelectorOperator>(){
                                  new MangoSelectorOperator("LastName"){
@@ -94,38 +102,55 @@ namespace test
                              }
                          }
                      }
-                 },
-                 IncludeExecutionStats = true
-             };
-             await RunQuery(query);
-             Console.WriteLine("Generating index for above query");
-             var indexResult = await client.CreateMangoIndexAsync(new MangoIndex(){
-                 DesignDocument ="index_collection",
-                 Name = "example_index_lastname",
-                 Index = new MangoIndexFields(){
-                     Fields = new List<string>(){
+                },
+                IncludeExecutionStats = true
+            };
+            await RunQuery(query);
+            Console.WriteLine("Generating index for above query");
+            var indexResult = await client.CreateMangoIndexAsync(new MangoIndex()
+            {
+                DesignDocument = "index_collection",
+                Name = "example_index_lastname",
+                Index = new MangoIndexFields()
+                {
+                    Fields = new List<string>(){
                          "LastName"
                      }
-                 },
-             },"pillow");
-             Console.WriteLine($"Index result: {indexResult.Result}");
-             query.UseIndex = new List<string>(){
+                },
+            }, "pillow");
+            Console.WriteLine($"Index result: {indexResult.Result}");
+            query.UseIndex = new List<string>(){
                  "index_collection"
              };
-             Console.WriteLine($"Running query again");
-             await RunQuery(query);
+            Console.WriteLine($"Running query again");
+            await RunQuery(query);
         }
 
-        private static async Task RunQuery(MangoQuery query){
-             var queryResult = await client.RunMangoQueryAsync<QueryPerson>(query,"pillow");
-             Console.WriteLine("Query results:");
-             Console.WriteLine($"Total docs: {queryResult.Docs.Count}");
-             Console.WriteLine($"Warning: {queryResult.Warning}");
-             Console.WriteLine($"ExecutionTimeMs: {queryResult.ExecutionStats?.ExecutionTimeMs}");
-             foreach (var item in queryResult.Docs)
-             {
-                  Console.WriteLine(item.ToString());
-             }
+        private static async Task RunListOnView()
+        {
+            //Add content here to show usage
+            var design = new CouchDesignDocument();
+            design.ID = "listtesting";
+            design.Views.Add("listview",new CouchView(){
+                Map = "function (doc) {emit(doc._id, doc);}"
+            });
+            design.Lists.Add("list","function(head,req){start();var filtered=[];while(row=getRow()){filtered.push(row.value);}send(toJSON(filtered));}");
+            await client.UpsertDesignDocumentAsync(design);
+            var result = await client.GetListFromViewAsync<List<Person>>("listtesting","list","listview",null);
+
+        }
+
+        private static async Task RunQuery(MangoQuery query)
+        {
+            var queryResult = await client.RunMangoQueryAsync<QueryPerson>(query, "pillow");
+            Console.WriteLine("Query results:");
+            Console.WriteLine($"Total docs: {queryResult.Docs.Count}");
+            Console.WriteLine($"Warning: {queryResult.Warning}");
+            Console.WriteLine($"ExecutionTimeMs: {queryResult.ExecutionStats?.ExecutionTimeMs}");
+            foreach (var item in queryResult.Docs)
+            {
+                Console.WriteLine(item.ToString());
+            }
         }
 
         public static async Task ListDB()

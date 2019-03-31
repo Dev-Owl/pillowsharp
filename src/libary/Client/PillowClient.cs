@@ -897,6 +897,52 @@ namespace PillowSharp.Client
                                    QueryParameter, HttpRequestMethod.POST,
                                    JSONHelper.ToJSON(ViewFilter)));
         }
+
+        public Task<T> GetListFromViewAsync<T>(string designDocumentID, string listName, string viewName, KeyValuePair<string, object>[] queryParameter, string databaseToUse = null) where T : new()
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return GetListFromView<T>(designDocumentID, listName, viewName, queryParameter, databaseToUse);
+            });
+        }
+
+        public T GetListFromView<T>(string designDocumentID, string listName, string viewName, KeyValuePair<string, object>[] queryParameter, string databaseToUse = null) where T : new()
+        {
+            return JSONHelper.FromJSON<T>(RunListFunction(designDocumentID, listName, viewName, queryParameter, databaseToUse));
+        }
+
+        private RestResponse RunListFunction(string designDocumentID, string listName, string viewName, KeyValuePair<string, object>[] queryParameter, string databaseToUse = null)
+        {
+            databaseToUse = GetDBToUseForRequest(null, databaseToUse);
+            Authenticate();
+            designDocumentID = EnsureDocumentIDIsValidDesignDocumentID(designDocumentID);
+            var response = RequestHelper.List(databaseToUse, designDocumentID, listName, viewName, queryParameter);
+            if (response.ResponseCode == HttpStatusCode.OK || response.ResponseCode == HttpStatusCode.Created)
+            {
+                return response;
+            }
+            else
+            {
+                PillowErrorHelper.HandleNoneOKResponse(response, JSONHelper);
+                return null;
+            }
+        }
+
+        public Task<string> GetListFromViewAsync(string designDocumentID, string listName, string viewName, KeyValuePair<string, object>[] queryParameter, string databaseToUse = null)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return GetListFromView(designDocumentID, listName, viewName, queryParameter, databaseToUse);
+            });
+        }
+
+        public string GetListFromView(string designDocumentID, string listName, string viewName, KeyValuePair<string, object>[] queryParameter, string databaseToUse = null)
+        {
+            return RunListFunction(designDocumentID, listName, viewName, queryParameter, databaseToUse).Content;
+        }
+
+
+
         //TODO Refactor the Calls to the GetDBToUserForRequest and Authenticate in each function to asingle call 
 
         public Task<T> RunUpdateFunctionAsync<T>(string DesignDocumentID, string UpdateFunctionName, string DocumentID = "", string DatabaseToUse = null, KeyValuePair<string, object>[] QueryParameter = null)

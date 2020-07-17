@@ -1,9 +1,13 @@
 dist: bionic
 before_instal:
   - export DEBIAN_FRONTEND=noninteractive
-  - sudo add-apt-repository ppa:couchdb/stable -y
-  - sudo apt-get update -y
+  - sudo apt-get install -y apt-transport-https gnupg ca-certificates
+  - echo "deb https://apache.bintray.com/couchdb-deb bionic main" \
+    | sudo tee -a /etc/apt/sources.list.d/couchdb.list
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys \
+  8756C4F765C9AC3CB6B85D62379CE192D401AB61
   - sudo apt-get remove couchdb couchdb-bin couchdb-common -yf
+  - sudo apt update -y
   - sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install couchdb
   - sudo service couchdb start
 language: csharp

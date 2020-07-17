@@ -24,7 +24,7 @@ namespace PillowSharp.Client
         ///<summary>
         ///Client version like 2.0.0
         ///</summary>
-        public string Version { get; } = "2.0.0";
+        public string Version { get; } = "2.0.1";
 
         private ICouchdbServer serverConfiguration = null;
 
@@ -408,6 +408,28 @@ namespace PillowSharp.Client
             return Task.Factory.StartNew(() =>
             {
                 return CreateMangoIndex(newIndex, database);
+            });
+        }
+
+        public PurgeResponse PurgeDocumentsInDatabase(PurgeRequest purgeRequest, string database = null)
+        {
+            if (purgeRequest is null)
+            {
+                throw new ArgumentNullException(nameof(purgeRequest));
+            }
+            var databaseForQuery = GetDBToUseForRequest(null, database);
+            //Create token if needed
+            Authenticate();
+            var response = HttpPost(RequestHelper.BuildURL(databaseForQuery, CouchEntryPoints.Purge), purgeRequest.WriteJosn());
+            return FromResponse<PurgeResponse>(response);
+
+        }
+
+        public Task<PurgeResponse> PurgeDocumentsInDatabaseAsync(PurgeRequest purgeRequest, string database = null)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return PurgeDocumentsInDatabase(purgeRequest, database);
             });
         }
 

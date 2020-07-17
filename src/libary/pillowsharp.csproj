@@ -1,9 +1,9 @@
-d<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>PillowSharp</PackageId>
-    <Version>3.0.3</Version>
+    <Version>3.0.4</Version>
     <Authors>Christian Muehle info@devowl.de</Authors>
     <Company>DevOwl</Company>
     <RepositoryUrl>https://github.com/Dev-Owl/pillowsharp</RepositoryUrl>
@@ -20,7 +20,8 @@ d<?xml version="1.0" encoding="utf-8" standalone="yes"?>
                          -Minor updates / fixes
                          Patch 0.3:
                          -Added support for list calls
-
+                         Patch 0.4:
+                         -Added support for purge opertaion
     </PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>

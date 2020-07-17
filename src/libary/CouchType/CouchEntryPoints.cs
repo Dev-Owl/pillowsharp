@@ -19,4 +19,6 @@ public static class CouchEntryPoints
     public const string MangoIndex = "_index";
 
     public const string List = "_list";
+
+    public const string Purge = "_purge";
 }

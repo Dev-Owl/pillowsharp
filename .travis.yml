@@ -1,4 +1,11 @@
 dist: bionic
+before_instal:
+  - export DEBIAN_FRONTEND=noninteractive
+  - sudo add-apt-repository ppa:couchdb/stable -y
+  - sudo apt-get update -y
+  - sudo apt-get remove couchdb couchdb-bin couchdb-common -yf
+  - sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install couchdb
+  - sudo service couchdb start
 language: csharp
 branches:  
   only:
@@ -6,8 +13,6 @@ branches:
 solution: pillowsharp.csproj
 mono: none
 dotnet: 2.0.0
-services:
-  - couchdb
 before_script: 
   - ./src/dev_couch2_setup.sh
 script: 

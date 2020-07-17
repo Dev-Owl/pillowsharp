@@ -21,3 +21,4 @@ before_script:
   - ./src/dev_couch2_setup.sh
 script: 
   - ./src/build.sh
+  

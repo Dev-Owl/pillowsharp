@@ -84,6 +84,17 @@ namespace test
         }
 
         [Fact]
+        public void TestQueryForAll()
+        {
+            _CreateDocument().Wait();
+            var client = GetTestClient();
+            client.RunForAllDbs((db) =>
+            {
+                Assert.True(client.GetAllDocuments(DatabaseToUse:db).TotalRows > 0);
+            }, (db) => db == TestDB);
+        }
+
+        [Fact]
         public void GetDocument()
         {
             _CreateDocument().Wait(); // ensure document exists

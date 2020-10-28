@@ -847,6 +847,64 @@ namespace PillowSharp.Client
         }
 
         /// <summary>
+        /// Run the same action on Multiple Dbs
+        /// </summary>
+        /// <param name="action">Called for each database, provided the database name</param>
+        /// <param name="databaseList">Name of the view insiide the document</param>
+        /// <returns></returns>
+        public void RunForMultipleDatabase(Action<string> action, List<string> databaseList)
+        {
+            databaseList.ForEach(db => action.Invoke(db));
+        }
+
+        /// <summary>
+        /// Run the same action on Multiple Dbs asyn
+        /// </summary>
+        /// <param name="action">Called for each database, provided the database name</param>
+        /// <param name="databaseList">Name of the view insiide the document</param>
+        /// <returns></returns>
+        public Task RunForMultipleDatabaseAsync(Action<string> action, List<string> databaseList)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                RunForMultipleDatabase(action, databaseList);
+            });
+        }
+
+        /// <summary>
+        /// Run the same action on all dbs with an optional filter
+        /// </summary>
+        /// <param name="action">Called for each database, provided the database name</param>
+        /// <param name="dbFilter">Optional filter, provided the database if true will call action</param>
+        /// <returns></returns>
+        public void RunForAllDbs(Action<string> action, Func<string, bool> dbFilter = null)
+        {
+            var allDbs = GetListOfAllDatabases();
+            if (dbFilter == null)
+            {
+                RunForMultipleDatabase(action, allDbs);
+            }
+            else
+            {
+                RunForMultipleDatabase(action, allDbs.Where(databse => dbFilter.Invoke(databse)).ToList());
+            }
+        }
+
+        /// <summary>
+        /// Run the same action on all dbs with an optional filter asyn
+        /// </summary>
+        /// <param name="action">Called for each database, provided the database name</param>
+        /// <param name="dbFilter">Optional filter, provided the database if true will call action</param>
+        /// <returns></returns>
+        public Task RunForAllDbsAsyn(Action<string> action, Func<string, bool> dbFilter = null)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                RunForAllDbs(action, dbFilter);
+            });
+        }
+
+        /// <summary>
         /// Get a view from CouchDB
         /// </summary>
         /// <typeparam name="T">Document type for view</typeparam>

@@ -30,14 +30,24 @@ namespace test
             client = new PillowClient(new BasicCouchDBServer("http://127.0.0.1:5984", new CouchLoginData("admin", "admin"), ELoginTypes.BasicAuth));
             client.TraceCallback = (traceInfo) =>
             {
+                Console.WriteLine("---Pillow trace---");
                 Console.WriteLine($"Endpoint: {traceInfo.RequestUrl}");
                 Console.WriteLine($"Metho: {traceInfo.RequestMethod}");
                 Console.WriteLine($"Duration(ms): {traceInfo.RequestTimeInMs}");
+                Console.WriteLine("------------------");
             };
             try
             {
                 client.Trace = true;
-                client.DeleteDatbase("pillow");
+                try
+                {
+                    client.DeleteDatbase("pillow");
+                }
+                catch
+                {
+                    //Clean up prev test run
+                }
+
                 await ListDB();
                 await GetUUIDS();
                 await CreateDB();
@@ -49,6 +59,8 @@ namespace test
                 await QueryDb();
                 await RunListOnView();
                 await DeleteDocument();
+                await RunForMultipleDbs();
+
 
             }
             catch (PillowException pEx)
@@ -78,6 +90,16 @@ namespace test
             {
                 return $"Hello my name is {LastName} and Im working as {Role}";
             }
+        }
+
+        private static async Task RunForMultipleDbs()
+        {
+            Console.WriteLine("Get count for all docs in all dbs");
+            await client.RunForAllDbsAsyn((db) =>
+            {
+                Console.WriteLine($"{db}:{client.GetAllDocuments(DatabaseToUse: db).TotalRows ?? 0}");
+            });
+        
         }
 
         private static async Task QueryDb()
@@ -131,12 +153,13 @@ namespace test
             //Add content here to show usage
             var design = new CouchDesignDocument();
             design.ID = "listtesting";
-            design.Views.Add("listview",new CouchView(){
+            design.Views.Add("listview", new CouchView()
+            {
                 Map = "function (doc) {emit(doc._id, doc);}"
             });
-            design.Lists.Add("list","function(head,req){start();var filtered=[];while(row=getRow()){filtered.push(row.value);}send(toJSON(filtered));}");
+            design.Lists.Add("list", "function(head,req){start();var filtered=[];while(row=getRow()){filtered.push(row.value);}send(toJSON(filtered));}");
             await client.UpsertDesignDocumentAsync(design);
-            var result = await client.GetListFromViewAsync<List<Person>>("listtesting","list","listview",null);
+            var result = await client.GetListFromViewAsync<List<Person>>("listtesting", "list", "listview", null);
 
         }
 
@@ -198,7 +221,8 @@ namespace test
         private static async Task UploadFileToDocument()
         {
             Console.WriteLine("Uploading sleepy owl");
-            var result = await client.AddAttachmentAsync(person.CouchDocument, "fav.image", "sleepy_owl.JPG");
+            var filePath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location), "sleepy_owl.JPG");
+            var result = await client.AddAttachmentAsync(person.CouchDocument, "fav.image", filePath);
             if (result.Ok)
             {
                 Console.WriteLine("Attachment added");

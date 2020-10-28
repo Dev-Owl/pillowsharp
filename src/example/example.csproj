@@ -7,4 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\libary\pillowsharp.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="sleepy_owl.JPG" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

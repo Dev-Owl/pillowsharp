@@ -1,4 +1,3 @@
-
 using pillowsharp.Middleware;
 using PillowSharp.BaseObject;
 using PillowSharp.CouchType;
@@ -339,6 +338,32 @@ namespace PillowSharp.Client
         {
             Authenticate();
             return JSONHelper.FromJSON<CouchConfirm>(RequestHelper.Delete(Name))?.Ok ?? false;
+        }
+
+        /// <summary>
+        /// Returns general information about the database (size, doc count, etc)
+        /// </summary>
+        /// <param name="DBName">Name of the database</param>
+        /// <returns></returns>
+        public Task<CouchDatabaseInformation> GetDatabaseInformationAsync(String DBName)
+        {
+            return Task.Factory.StartNew(() => 
+            { 
+                return this.GetDatabaseInformation(DBName); 
+            });
+        }
+
+        /// <summary>
+        /// Returns general information about the database (size, doc count, etc)
+        /// </summary>
+        /// <param name="DBName">Name of the database</param>
+        /// <returns></returns>
+        public CouchDatabaseInformation GetDatabaseInformation(String DBName)
+        {
+            Authenticate();
+            var response = RequestHelper.Get(DBName);
+            var info = JSONHelper.FromJSON<CouchDatabaseInformation>(response);
+            return info;
         }
 
         /// <summary>

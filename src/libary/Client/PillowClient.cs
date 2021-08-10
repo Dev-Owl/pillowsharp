@@ -345,6 +345,7 @@ namespace PillowSharp.Client
         /// </summary>
         /// <param name="DBName">Name of the database</param>
         /// <returns></returns>
+        /// <exception cref="CouchException">Thrown if DB does not exist</exception>
         public Task<CouchDatabaseInformation> GetDatabaseInformationAsync(String DBName)
         {
             return Task.Factory.StartNew(() => 
@@ -358,6 +359,7 @@ namespace PillowSharp.Client
         /// </summary>
         /// <param name="DBName">Name of the database</param>
         /// <returns></returns>
+        /// <exception cref="CouchException">Thrown if DB does not exist</exception>
         public CouchDatabaseInformation GetDatabaseInformation(String DBName)
         {
             Authenticate();

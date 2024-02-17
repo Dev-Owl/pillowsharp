@@ -7,19 +7,23 @@ namespace pillowsharp.Middleware.Default
     public class RestSharpResponse : RestResponse
     {
 
-        private IRestResponse restSharpResponse = null;
+        private RestSharp.RestResponse restSharpResponse = null;
 
-        public RestSharpResponse(IRestResponse Response)
+        public RestSharpResponse(RestSharp.RestResponse Response)
         {
             restSharpResponse = Response;
             this.Content = restSharpResponse.Content;
             this.ResponseCode = restSharpResponse.StatusCode;
             this.RawBytes = restSharpResponse.RawBytes;
             var cookies = new List<SimpleCookie>();
-            foreach(var restCookie in Response.Cookies)
+            if (Response.Cookies != null)
             {
-                cookies.Add(new SimpleCookie() { Name = restCookie.Name, Value = restCookie.Value });
+                foreach (System.Net.Cookie restCookie in Response.Cookies)
+                {
+                    cookies.Add(new SimpleCookie() { Name = restCookie.Name, Value = restCookie.Value });
+                }
             }
+
             this.Cookies = cookies;
             this.Header = new List<KeyValuePair<string, string>>();
             foreach (var header in Response.Headers.Where(h => h.Type == ParameterType.HttpHeader))

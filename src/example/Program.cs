@@ -99,7 +99,7 @@ namespace test
             {
                 Console.WriteLine($"{db}:{client.GetAllDocuments(DatabaseToUse: db).TotalRows ?? 0}");
             });
-        
+
         }
 
         private static async Task QueryDb()

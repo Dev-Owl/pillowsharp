@@ -40,22 +40,36 @@ namespace PillowSharp.Middleware.Default
 
         public override void UpdateServerData(ICouchdbServer Server)
         {
-            //Creteate the rest clinet
-            client = new RestClient(Server.GetServerURL());
+            RestClientOptions clientOptions = null;
             //Generate needed data for selected auth type
             if (Server.LoginType == ELoginTypes.BasicAuth)
             {
-                client.Authenticator = new HttpBasicAuthenticator(Server.GetLoginData().UserName, Server.GetLoginData().Password);
+                clientOptions = new RestClientOptions(Server.GetServerURL())
+                {
+                    Authenticator = new HttpBasicAuthenticator(Server.GetLoginData().UserName, Server.GetLoginData().Password)
+                };
             }
             else if (Server.LoginType == ELoginTypes.TokenLogin)
             {
                 cookieContainer = new CookieContainer();
-                client.CookieContainer = cookieContainer;
+                clientOptions = new RestClientOptions(Server.GetServerURL())
+                {
+                    CookieContainer = cookieContainer
+                };
                 serverURI = new Uri(Server.GetServerURL());
             }
+            else
+            {
+                clientOptions = new RestClientOptions(Server.GetServerURL());
+            }
+
+
+
+            //Creteate the rest clinet
+            client = new RestClient(clientOptions);
         }
 
-        private RestRequest BuildRequestBase(string Resource, Method Method = Method.GET, int TimeOut = 30, KeyValuePair<string, object>[] QueryParameter = null)
+        private RestRequest BuildRequestBase(string Resource, Method Method = Method.Get, int TimeOut = 30, KeyValuePair<string, object>[] QueryParameter = null)
         {
             var request = new RestRequest
             {
@@ -160,7 +174,7 @@ namespace PillowSharp.Middleware.Default
         //PUT request to the given URL with optional body
         public override pillowsharp.Middleware.RestResponse Put(string Url, string Body = null, KeyValuePair<string, object>[] QueryParameter = null)
         {
-            var putRequest = BuildRequestBase(Url, Method.PUT, QueryParameter: QueryParameter);
+            var putRequest = BuildRequestBase(Url, Method.Put, QueryParameter: QueryParameter);
             if (!string.IsNullOrEmpty(Body))
                 AddJSONBody(putRequest, Body);
             return Request(putRequest);
@@ -176,7 +190,7 @@ namespace PillowSharp.Middleware.Default
         }
         public override pillowsharp.Middleware.RestResponse Delete(string Uri)
         {
-            return Request(BuildRequestBase(Uri, Method.DELETE));
+            return Request(BuildRequestBase(Uri, Method.Delete));
         }
 
 
@@ -190,7 +204,7 @@ namespace PillowSharp.Middleware.Default
         //Post requrest to the given URL with an optional Body
         public override pillowsharp.Middleware.RestResponse Post(string Uri, string Body = null)
         {
-            var postRequest = BuildRequestBase(Uri, Method.POST);
+            var postRequest = BuildRequestBase(Uri, Method.Post);
             if (!string.IsNullOrEmpty(Body))
                 AddJSONBody(postRequest, Body);
             return Request(postRequest);
@@ -213,7 +227,7 @@ namespace PillowSharp.Middleware.Default
         //Add a file to an existing document
         public override pillowsharp.Middleware.RestResponse UploadFile(string ID, string AttachmentName, string Revision, string Database, string File)
         {
-            var putRequest = BuildFileBaseRequest(ID, AttachmentName, Revision, Database, Method.PUT);
+            var putRequest = BuildFileBaseRequest(ID, AttachmentName, Revision, Database, Method.Put);
             var contentType = MimeMapping.GetMimeType(File);
             putRequest.AlwaysMultipartFormData = false;
             putRequest.AddHeader("Content-Type", contentType);
@@ -231,27 +245,27 @@ namespace PillowSharp.Middleware.Default
         //Delete a file from an existing document
         public override pillowsharp.Middleware.RestResponse DeleteFile(string ID, string AttachmentName, string Revision, string Database)
         {
-            var deleteRequest = BuildFileBaseRequest(ID, AttachmentName, Revision, Database, Method.DELETE);
+            var deleteRequest = BuildFileBaseRequest(ID, AttachmentName, Revision, Database, Method.Delete);
             return Request(deleteRequest);
         }
 
         //Get a file from an existing document
         public override pillowsharp.Middleware.RestResponse GetFile(string ID, string AttachmentName, string Revision, string Database)
         {
-            return Request(BuildFileBaseRequest(ID, AttachmentName, Revision, Database, Method.GET));
+            return Request(BuildFileBaseRequest(ID, AttachmentName, Revision, Database, Method.Get));
         }
 
         //Set the given value for the coo
         public override void SetCookie(string CookieName, string Value)
         {
-            var currentCookie = client.CookieContainer.GetCookies(serverURI)[CookieName];
+            var currentCookie = client.Options.CookieContainer.GetCookies(serverURI)[CookieName];
             if (currentCookie != null)
             {
                 currentCookie.Value = Value;
             }
             else
             {
-                client.CookieContainer.Add(serverURI, new Cookie(CookieName, Value, "/"));
+                client.Options.CookieContainer.Add(serverURI, new Cookie(CookieName, Value, "/"));
             }
         }
 
@@ -276,7 +290,7 @@ namespace PillowSharp.Middleware.Default
 
         public override pillowsharp.Middleware.RestResponse List(string database, string designDocumentId, string listName, string ViewName, KeyValuePair<string, object>[] queryParameter)
         {
-            var listRequest = BuildRequestBase(BuildURL(database,designDocumentId,CouchEntryPoints.List,listName,ViewName),(Method)HttpRequestMethod.GET, QueryParameter: queryParameter);
+            var listRequest = BuildRequestBase(BuildURL(database, designDocumentId, CouchEntryPoints.List, listName, ViewName), (Method)HttpRequestMethod.GET, QueryParameter: queryParameter);
             return Request(listRequest);
         }
 
@@ -289,7 +303,7 @@ namespace PillowSharp.Middleware.Default
         }
         public override pillowsharp.Middleware.RestResponse Head(string Uri)
         {
-            return Request(BuildRequestBase(Uri, Method.HEAD));
+            return Request(BuildRequestBase(Uri, Method.Head));
         }
 
         public override Task<pillowsharp.Middleware.RestResponse> GetAsync(string Url)

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>PillowSharp</PackageId>
-    <Version>3.0.5</Version>
+    <Version>4.0.0</Version>
     <Authors>Christian Muehle info@devowl.de</Authors>
     <Company>DevOwl</Company>
     <RepositoryUrl>https://github.com/Dev-Owl/pillowsharp</RepositoryUrl>
@@ -11,6 +11,10 @@
     <PackageLicenseUrl>https://github.com/Dev-Owl/pillowsharp/blob/master/LICENSE.md</PackageLicenseUrl>
     <Description>Simple and easy to use client for Apache CouchDB</Description>
     <PackageReleaseNotes>
+                         V4.X Major featuers:
+                         - Upgraded all used nugets to latest stable
+                         - Support for RestSharp 107+
+                         - Moved test and example to NET8.0
                          V3.X Major feature:
                          -Added support for Mango Queries
                          -Added support for tracing 

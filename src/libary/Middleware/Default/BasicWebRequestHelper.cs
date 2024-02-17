@@ -279,10 +279,12 @@ namespace PillowSharp.Middleware.Default
         //Run, change or create the given view
         public override pillowsharp.Middleware.RestResponse View(string Database, string DocumentName, string ViewFunctionName, KeyValuePair<string, object>[] QueryParameter, HttpRequestMethod HTTPMethod, string Filter)
         {
-            if (!Enum.IsDefined(typeof(Method), HTTPMethod.ToString()))
+            //Ensure we can match the "new" restsharp http methdo enum
+            if (Enum.TryParse(HTTPMethod.ToString(), true, out Method targetHttpMethod) == false)
                 throw new PillowException($"Unable to use {HTTPMethod} as a request method in the default WebRequestHelper");
+
             var viewRequest = BuildRequestBase(BuildURL(Database, DocumentName, CouchEntryPoints.ViewDoc, ViewFunctionName),
-                                          QueryParameter: QueryParameter, Method: (Method)HTTPMethod);
+                                          QueryParameter: QueryParameter, Method: targetHttpMethod);
             if (!string.IsNullOrEmpty(Filter))
                 AddJSONBody(viewRequest, Filter);
             return Request(viewRequest);

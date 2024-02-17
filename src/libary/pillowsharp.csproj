@@ -7,8 +7,9 @@
     <Authors>Christian Muehle info@devowl.de</Authors>
     <Company>DevOwl</Company>
     <RepositoryUrl>https://github.com/Dev-Owl/pillowsharp</RepositoryUrl>
-    <PackageIconUrl>https://raw.githubusercontent.com/Dev-Owl/pillowsharp/master/logo.png</PackageIconUrl>
-    <PackageLicenseUrl>https://github.com/Dev-Owl/pillowsharp/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageIcon>logo.png</PackageIcon>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <Description>Simple and easy to use client for Apache CouchDB</Description>
     <PackageReleaseNotes>
                          V4.X Major featuers:
@@ -29,9 +30,13 @@
                          Patch 0.5:
                          -Added support for run function on multiple db
     </PackageReleaseNotes>
+
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="RestSharp" Version="110.2.0" />
+    <None Include="../../logo.png" Pack="true" PackagePath=""/>
+    <None Include="../../LICENSE.md" Pack="true" PackagePath=""/>
+    <None Include="../../README.md" Pack="true" PackagePath=""/>
   </ItemGroup>
 </Project>

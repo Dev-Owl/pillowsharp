@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>PillowSharp</PackageId>
-    <Version>4.0.0</Version>
+    <Version>4.0.1</Version>
     <Authors>Christian Muehle info@devowl.de</Authors>
     <Company>DevOwl</Company>
     <RepositoryUrl>https://github.com/Dev-Owl/pillowsharp</RepositoryUrl>
@@ -16,6 +16,8 @@
                          - Upgraded all used nugets to latest stable
                          - Support for RestSharp 107+
                          - Moved test and example to NET8.0
+                         Path 0.1:‡Y
+                         - Fix Mango query generation due to NewtonsoftJson chnage
                          V3.X Major feature:
                          -Added support for Mango Queries
                          -Added support for tracing 

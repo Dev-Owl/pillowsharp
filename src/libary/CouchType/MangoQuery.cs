@@ -34,7 +34,7 @@ namespace PillowSharp.CouchType
         public List<string> UseIndex { get; set; }
         public void Validate()
         {
-            if((Selector?.Operations?.Count ?? 0) == 0)
+            if ((Selector?.Operations?.Count ?? 0) == 0)
                 throw new PillowException("Queries must have at least one selector");
         }
 
@@ -102,7 +102,8 @@ namespace PillowSharp.CouchType
                 }
                 else
                 {
-                    writer.WriteValue(dataProp.Value);
+                    serializer.Serialize(writer, dataProp.Value);
+
                 }
 
             }

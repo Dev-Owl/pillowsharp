@@ -109,6 +109,31 @@ namespace test
         }
 
         [Fact]
+        public async Task MangoTestNullValue()
+        {
+            await _CreateDocument();
+            string searchValue = null;
+            var client = GetTestClient();
+            var result = await client.RunMangoQueryAsync<TestDocument>(new MangoQuery()
+            {
+                Selector = new MangoSelector()
+                {
+                    Operations = new List<MangoSelectorOperator>(){
+                    new MangoSelectorOperator("StringProp"){
+
+                        OperatorValues = new List<MangoSelectorOperator>(){
+                            new MangoSelectorOperator("$eq"){
+                                SimpleOperatorValue = searchValue
+                            }
+                        }
+                    }
+                }
+                }
+            }, this.TestDB);
+            Assert.Empty(result.Docs);
+        }
+
+        [Fact]
         public void TestQueryForAll()
         {
             _CreateDocument().Wait();

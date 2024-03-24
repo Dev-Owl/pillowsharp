@@ -113,8 +113,8 @@ namespace PillowSharp.CouchType
         private JObject GenerateJson(MangoSelectorOperator selector)
         {
             var currentObject = new JObject();
-            if (selector.SimpleOperatorValue != null)
-                currentObject.Add(selector.OperatorKey, JToken.FromObject(selector.SimpleOperatorValue));
+            if (selector.SimpleOperatorValue != null || (selector.SimpleOperatorValue == null && (selector.OperatorValues == null || selector.OperatorValues.Count == 0)))
+                currentObject.Add(selector.OperatorKey, selector.SimpleOperatorValue == null ? null : JToken.FromObject(selector.SimpleOperatorValue));
             else if (selector.OperatorValues.Count == 1)
             {
                 currentObject.Add(selector.OperatorKey, GenerateJson(selector.OperatorValues.First()));

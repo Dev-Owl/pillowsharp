@@ -2,7 +2,9 @@ using System;
 using System.Threading.Tasks;
 using PillowSharp.BaseObject;
 using PillowSharp.CouchType;
+using System.Collections.Generic;
 using Xunit;
+using PillowSharp.Helper;
 
 namespace PillowSharp.Tests
 {
@@ -115,6 +117,56 @@ namespace PillowSharp.Tests
             Assert.Contains(viewResult.Rows, row => row.ID == "test_partition:5678");
         }
 
+        [Fact]
+        public async Task CreatePartitionedMangoIndex()
+        {
+            // Arrange
+            var client = GetTestClient(BaseObject.ELoginTypes.BasicAuth);
+            await client.CreateNewDatabaseAsync(TestDB, Partitioned: true);
+
+            var indexDefinition = new MangoIndex
+            {
+                Index = new MangoIndexFields
+                {
+                    Fields = new List<string>()
+                    {
+                        "StringProp"
+                    }
+                },
+                Name = "StringProp-index",
+                Type = "json",
+                Partitioned = true,
+                DesignDocument = "test_index"
+            };
+
+            var indexResult = await client.CreateMangoIndexAsync(indexDefinition, TestDB);
+            Assert.Equal("created", indexResult.Result);
+
+            var testDoc1 = TestDocument.GenerateTestObject();
+            testDoc1.ID = "test_partition:1234";
+            testDoc1.StringProp = "test";
+            var result1 = await client.CreateANewDocumentAsync(testDoc1, TestDB);
+            Assert.True(result1.Ok);
+
+            var testDoc2 = TestDocument.GenerateTestObject();
+            testDoc2.ID = "test_partition:5678";
+            testDoc2.StringProp = "test";
+            var result2 = await client.CreateANewDocumentAsync(testDoc2, TestDB);
+            Assert.True(result2.Ok);
+
+            // Act
+            var mangoQuery = MangoQueryHelper.FieldIsEqualQuery("StringProp", "test");
+            mangoQuery.IncludeExecutionStats = true;
+            mangoQuery.UseIndex = new List<string> { "test_index" };
+            var queryResult = await client.RunMangoQueryAsync<TestDocument>(mangoQuery, TestDB, "test_partition");
+
+            // Assert
+            Assert.NotNull(queryResult);
+            Assert.Equal(2, queryResult.Docs.Count);
+            Assert.Contains(queryResult.Docs, doc => doc.ID == "test_partition:1234");
+            Assert.Contains(queryResult.Docs, doc => doc.ID == "test_partition:5678");
+            Assert.Null(queryResult.Warning);
+        }
 
         public void Dispose()
         {

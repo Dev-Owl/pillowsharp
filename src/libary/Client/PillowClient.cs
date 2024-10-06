@@ -374,11 +374,11 @@ namespace PillowSharp.Client
         /// <param name="database">Override any other db set for this client and run query on this db</param>
         /// <typeparam name="T">Type that is requested by the query</typeparam>
         /// <returns>Result of the query</returns>
-        public Task<MangoQueryResult<T>> RunMangoQueryAsync<T>(MangoQuery query, string database = null)
+        public Task<MangoQueryResult<T>> RunMangoQueryAsync<T>(MangoQuery query, string database = null, string partition = null)
         {
             return Task.Factory.StartNew(() =>
             {
-                return this.RunMangoQuery<T>(query, database);
+                return this.RunMangoQuery<T>(query, database, partition);
             });
         }
 
@@ -389,7 +389,7 @@ namespace PillowSharp.Client
         /// <param name="database">Override any other db set for this client and run query on this db</param>
         /// <typeparam name="T">Type that is requested by the query</typeparam>
         /// <returns>Result of the query</returns>
-        public MangoQueryResult<T> RunMangoQuery<T>(MangoQuery query, string database = null)
+        public MangoQueryResult<T> RunMangoQuery<T>(MangoQuery query, string database = null, string partition = null)
         {
             if (query == null)
             {
@@ -398,7 +398,13 @@ namespace PillowSharp.Client
             //Ensure the query is at least following the rules, still open to fail later...
             query.Validate();
             var databaseForQuery = GetDatabaseAndAuthenticateIfNeeded(null, database);
-            var response = HttpPost(RequestHelper.BuildURL(databaseForQuery, CouchEntryPoints.MangoQuery), JSONHelper.ToJSON(query));
+            var urlParts = new List<string> { databaseForQuery, CouchEntryPoints.MangoQuery };
+            if (!string.IsNullOrEmpty(partition))
+            {
+                urlParts.Insert(1, CouchEntryPoints.Partition);
+                urlParts.Insert(2, partition);
+            }
+            var response = HttpPost(RequestHelper.BuildURL(urlParts.ToArray()), JSONHelper.ToJSON(query));
             return FromResponse<MangoQueryResult<T>>(response);
         }
 

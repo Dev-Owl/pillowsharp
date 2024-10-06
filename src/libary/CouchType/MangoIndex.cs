@@ -24,23 +24,26 @@ namespace PillowSharp.CouchType
 
         [JsonProperty(PropertyName = "partial_filter_selector")]
         public MangoSelector PartialSelector { get; set; }
+
+        [JsonProperty(PropertyName = "partitioned")]
+        public bool Partitioned { get; set; }
     }
 
     public class MangoIndexFields
     {
-        [JsonProperty(PropertyName="fields")]
+        [JsonProperty(PropertyName = "fields")]
         public List<string> Fields { get; set; }
     }
 
     public class MangoIndexResponse
     {
-        [JsonProperty(PropertyName="result")]
+        [JsonProperty(PropertyName = "result")]
         public string Result { get; set; }
 
-        [JsonProperty(PropertyName="id")]
+        [JsonProperty(PropertyName = "id")]
         public string Id { get; set; }
 
-        [JsonProperty(PropertyName="name")]
+        [JsonProperty(PropertyName = "name")]
         public string Name { get; set; }
     }
 }

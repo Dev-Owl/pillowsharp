@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace PillowSharp.Client
@@ -23,7 +24,7 @@ namespace PillowSharp.Client
         ///<summary>
         ///Client version like 2.0.0
         ///</summary>
-        public string Version { get; } = "2.0.1";
+        public string Version { get; } = "4.0.3";
 
         private ICouchdbServer serverConfiguration = null;
 
@@ -126,7 +127,6 @@ namespace PillowSharp.Client
 
 
         #region Server/DB Functions
-        //TODO Think about nicer way for await Authenticate in each call
 
         /// <summary>
         /// If Token authentication is used, login and store the token or add an existing to the current request
@@ -201,7 +201,7 @@ namespace PillowSharp.Client
         /// <returns>New UUID</returns>
         public string GetSingleUUID()
         {
-            var result = _GetUUIDs(AmountOfUUIDs: 1);
+            var result = GetUUIDs(AmountOfUUIDs: 1);
             return result.UUIDS.FirstOrDefault();
         }
 
@@ -225,10 +225,14 @@ namespace PillowSharp.Client
         /// <returns>List of IDs</returns>
         public CouchUUIDResponse GetManyUUIDs(int AmountOfUUIDs)
         {
-            return _GetUUIDs(AmountOfUUIDs);
+            if (AmountOfUUIDs <= 0)
+            {
+                throw new ArgumentOutOfRangeException("You must request 1 or more UUIDS", "AmountOfUUIDs");
+            }
+            return GetUUIDs(AmountOfUUIDs);
         }
 
-        private CouchUUIDResponse _GetUUIDs(int AmountOfUUIDs = 1)
+        private CouchUUIDResponse GetUUIDs(int AmountOfUUIDs = 1)
         {
             //Create token if needed
             Authenticate();
@@ -259,7 +263,7 @@ namespace PillowSharp.Client
             //Create token if needed
             Authenticate();
             //Get list of all db and check if included
-            return (GetListOfAllDatabases()).Contains(Name);
+            return GetListOfAllDatabases().Contains(Name);
         }
 
         /// <summary>
@@ -348,9 +352,9 @@ namespace PillowSharp.Client
         /// <exception cref="CouchException">Thrown if DB does not exist</exception>
         public Task<CouchDatabaseInformation> GetDatabaseInformationAsync(String DBName)
         {
-            return Task.Factory.StartNew(() => 
-            { 
-                return this.GetDatabaseInformation(DBName); 
+            return Task.Factory.StartNew(() =>
+            {
+                return this.GetDatabaseInformation(DBName);
             });
         }
 
@@ -398,9 +402,7 @@ namespace PillowSharp.Client
             }
             //Ensure the query is at least following the rules, still open to fail later...
             query.Validate();
-            var databaseForQuery = GetDBToUseForRequest(null, database);
-            //Create token if needed
-            Authenticate();
+            var databaseForQuery = GetDatabaseAndAuthenticateIfNeeded(null, database);
             var response = HttpPost(RequestHelper.BuildURL(databaseForQuery, CouchEntryPoints.MangoQuery), JSONHelper.ToJSON(query));
             return FromResponse<MangoQueryResult<T>>(response);
         }
@@ -417,9 +419,7 @@ namespace PillowSharp.Client
             {
                 throw new ArgumentNullException(nameof(newIndex));
             }
-            var databaseForQuery = GetDBToUseForRequest(null, database);
-            //Create token if needed
-            Authenticate();
+            var databaseForQuery = GetDatabaseAndAuthenticateIfNeeded(null, database);
             var response = HttpPost(RequestHelper.BuildURL(databaseForQuery, CouchEntryPoints.MangoIndex), JSONHelper.ToJSON(newIndex));
             return FromResponse<MangoIndexResponse>(response);
         }
@@ -444,9 +444,7 @@ namespace PillowSharp.Client
             {
                 throw new ArgumentNullException(nameof(purgeRequest));
             }
-            var databaseForQuery = GetDBToUseForRequest(null, database);
-            //Create token if needed
-            Authenticate();
+            var databaseForQuery = GetDatabaseAndAuthenticateIfNeeded(null, database);
             var response = HttpPost(RequestHelper.BuildURL(databaseForQuery, CouchEntryPoints.Purge), purgeRequest.WriteJosn());
             return FromResponse<PurgeResponse>(response);
 
@@ -488,9 +486,7 @@ namespace PillowSharp.Client
         public CouchDocumentChange CreateANewDocument<T>(T NewDocument, string DatabaseToCreateDocumentIn = null) where T : new()
         {
             //Get datbase to use
-            DatabaseToCreateDocumentIn = GetDBToUseForRequest(typeof(T), DatabaseToCreateDocumentIn);
-            //Create token if needed
-            Authenticate();
+            DatabaseToCreateDocumentIn = GetDatabaseAndAuthenticateIfNeeded(typeof(T), DatabaseToCreateDocumentIn);
 
             if (NewDocument is CouchDocument)
             {
@@ -509,7 +505,7 @@ namespace PillowSharp.Client
             //If result is ok and the new created entity is based on CouchDocument set values as returned by the server
             if (result.Ok && NewDocument is CouchDocument)
             {
-                var couchDoc = (NewDocument as CouchDocument);
+                var couchDoc = NewDocument as CouchDocument;
                 couchDoc.ID = result.ID;
                 couchDoc.Rev = result.Rev;
                 couchDoc.Deleted = false;
@@ -541,7 +537,7 @@ namespace PillowSharp.Client
         /// <returns>The change record from CouchDb</returns>
         public CouchDocumentChange DeleteDocument<T>(T Document, string DatabaseToDeleteDocumentIn = null) where T : CouchDocument
         {
-            return (DeleteDocuments<T>(new List<T>() { Document }, DatabaseToDeleteDocumentIn)).FirstOrDefault();
+            return DeleteDocuments<T>(new List<T>() { Document }, DatabaseToDeleteDocumentIn).FirstOrDefault();
         }
 
         //Delete a list of documents in the db
@@ -556,9 +552,7 @@ namespace PillowSharp.Client
         public List<CouchDocumentChange> DeleteDocuments<T>(List<T> Documents, string DatabaseToDeleteDocumentIn = null) where T : CouchDocument
         {
             //Get datbase to use
-            DatabaseToDeleteDocumentIn = GetDBToUseForRequest(typeof(T), DatabaseToDeleteDocumentIn);
-            //Create token if needed
-            Authenticate();
+            DatabaseToDeleteDocumentIn = GetDatabaseAndAuthenticateIfNeeded(typeof(T), DatabaseToDeleteDocumentIn);
             //Ensure the document is marked as deleted
             Documents.ForEach(d => d.Deleted = true);
             //Use bulk operation to delete the list of documents
@@ -596,7 +590,7 @@ namespace PillowSharp.Client
         public CouchDocumentChange UpdateDocument<T>(T Document, string DatabaseToUpdateDocumentIn = null) where T : CouchDocument
         {
             //Call bulk update db will be set in there
-            return (UpdateDocuments<T>(new List<T>() { Document }, DatabaseToUpdateDocumentIn)).FirstOrDefault();
+            return UpdateDocuments<T>(new List<T>() { Document }, DatabaseToUpdateDocumentIn).FirstOrDefault();
         }
         /// <summary>
         /// Bulk Update,Create,Delete Documents
@@ -714,9 +708,7 @@ namespace PillowSharp.Client
         public T GetDocument<T>(string ID, string Revision = null, string DatabaseToUse = null) where T : new()
         {
             //Document == null -> check if entity has meta 
-            DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
-            //Create token if needed
-            Authenticate();
+            DatabaseToUse = GetDatabaseAndAuthenticateIfNeeded(typeof(T), DatabaseToUse);
             var result = RequestHelper.GetDocument(ID, DatabaseToUse, Revision: Revision);
             return FromResponse<T>(result);
         }
@@ -742,8 +734,7 @@ namespace PillowSharp.Client
         /// <returns></returns>
         public CouchDocumentResponse<CouchViewResponse<AllDocResponse>> GetAllDocuments(Type Document = null, string DatabaseToUse = null)
         {
-            DatabaseToUse = GetDBToUseForRequest(Document, DatabaseToUse); // Get database to use
-            //TODO Ugly response to many <>
+            DatabaseToUse = GetDatabaseAndAuthenticateIfNeeded(Document, DatabaseToUse); // Get database to use
             return JSONHelper.FromJSON<CouchDocumentResponse<CouchViewResponse<AllDocResponse>>>(
                 RequestHelper.Get(RequestHelper.BuildURL(DatabaseToUse, CouchEntryPoints.AllDocs))); //return result to client
         }
@@ -778,7 +769,7 @@ namespace PillowSharp.Client
         {
             if (!System.IO.File.Exists(PathToFile))
                 throw new PillowException($"Unable to find file {PathToFile}!");
-            DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
+            DatabaseToUse = GetDatabaseAndAuthenticateIfNeeded(typeof(T), DatabaseToUse);
             var result = JSONHelper.FromJSON<CouchDocumentChange>(
                 RequestHelper.UploadFile(Document.ID, AttachmentName,
                                          Document.Rev, DatabaseToUse, PathToFile));
@@ -816,8 +807,7 @@ namespace PillowSharp.Client
         /// <returns></returns>
         public byte[] GetAttachement<T>(T Document, string AttachmentName, string DatabaseToUse = null) where T : CouchDocument
         {
-            DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
-            Authenticate();
+            DatabaseToUse = GetDatabaseAndAuthenticateIfNeeded(typeof(T), DatabaseToUse);
             //Ask for file data
             var response = RequestHelper.GetFile(Document.ID, AttachmentName, Document.Rev, DatabaseToUse);
             //In case something went wrong throw an error
@@ -853,8 +843,7 @@ namespace PillowSharp.Client
         /// <returns></returns>
         public CouchDocumentChange DeleteAttachment<T>(T Document, string AttributeName, string DatabaseToUse = null) where T : CouchDocument
         {
-            DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
-            Authenticate();
+            DatabaseToUse = GetDatabaseAndAuthenticateIfNeeded(typeof(T), DatabaseToUse);
             var result = JSONHelper.FromJSON<CouchDocumentChange>(
                                     RequestHelper.DeleteFile(Document.ID, AttributeName, Document.Rev, DatabaseToUse));
             if (result.Ok)
@@ -959,8 +948,7 @@ namespace PillowSharp.Client
         /// <returns></returns>
         public CouchDocumentResponse<T> GetView<T>(string DocumentID, string ViewName, KeyValuePair<string, object>[] QueryParameter = null, string DatabaseToUse = null) where T : new()
         {
-            DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
-            Authenticate();
+            DatabaseToUse = GetDatabaseAndAuthenticateIfNeeded(typeof(T), DatabaseToUse);
             DocumentID = EnsureDocumentIDIsValidDesignDocumentID(DocumentID);
             return JSONHelper.FromJSON<CouchDocumentResponse<T>>(
                 RequestHelper.View(DatabaseToUse, DocumentID, ViewName, QueryParameter, HttpRequestMethod.GET, null));
@@ -996,8 +984,7 @@ namespace PillowSharp.Client
         /// <returns></returns>
         public CouchDocumentResponse<T> FilterView<T>(string DocumentID, string ViewName, CouchViewFilter ViewFilter, KeyValuePair<string, object>[] QueryParameter = null, string DatabaseToUse = null) where T : new()
         {
-            DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
-            Authenticate();
+            DatabaseToUse = GetDatabaseAndAuthenticateIfNeeded(typeof(T), DatabaseToUse);
             DocumentID = EnsureDocumentIDIsValidDesignDocumentID(DocumentID);
             return JSONHelper.FromJSON<CouchDocumentResponse<T>>(
                 RequestHelper.View(DatabaseToUse, DocumentID, ViewName,
@@ -1020,8 +1007,7 @@ namespace PillowSharp.Client
 
         private RestResponse RunListFunction(string designDocumentID, string listName, string viewName, KeyValuePair<string, object>[] queryParameter, string databaseToUse = null)
         {
-            databaseToUse = GetDBToUseForRequest(null, databaseToUse);
-            Authenticate();
+            databaseToUse = GetDatabaseAndAuthenticateIfNeeded(null, databaseToUse);
             designDocumentID = EnsureDocumentIDIsValidDesignDocumentID(designDocumentID);
             var response = RequestHelper.List(databaseToUse, designDocumentID, listName, viewName, queryParameter);
             if (response.ResponseCode == HttpStatusCode.OK || response.ResponseCode == HttpStatusCode.Created)
@@ -1048,10 +1034,6 @@ namespace PillowSharp.Client
             return RunListFunction(designDocumentID, listName, viewName, queryParameter, databaseToUse).Content;
         }
 
-
-
-        //TODO Refactor the Calls to the GetDBToUserForRequest and Authenticate in each function to asingle call 
-
         public Task<T> RunUpdateFunctionAsync<T>(string DesignDocumentID, string UpdateFunctionName, string DocumentID = "", string DatabaseToUse = null, KeyValuePair<string, object>[] QueryParameter = null)
         {
             return Task.Factory.StartNew(() =>
@@ -1062,8 +1044,7 @@ namespace PillowSharp.Client
 
         public T RunUpdateFunction<T>(string DesignDocumentID, string UpdateFunctionName, string DocumentID = "", string DatabaseToUse = null, KeyValuePair<string, object>[] QueryParameter = null)
         {
-            DatabaseToUse = GetDBToUseForRequest(typeof(T), DatabaseToUse);
-            Authenticate();
+            DatabaseToUse = GetDatabaseAndAuthenticateIfNeeded(typeof(T), DatabaseToUse);
             var response = RequestHelper.Put(RequestHelper.BuildURL(DatabaseToUse,
                                             EnsureDocumentIDIsValidDesignDocumentID(DesignDocumentID),
                                             CouchEntryPoints.UpdateFunction,
@@ -1095,8 +1076,7 @@ namespace PillowSharp.Client
         /// <returns></returns>
         public CouchDesignDocument GetDesignDocument(string DocumentID, string DatabaseToUse = null)
         {
-            DatabaseToUse = GetDBToUseForRequest(null, DatabaseToUse);
-            Authenticate();
+            DatabaseToUse = GetDatabaseAndAuthenticateIfNeeded(null, DatabaseToUse);
             DocumentID = EnsureDocumentIDIsValidDesignDocumentID(DocumentID);
             return JSONHelper.FromJSON<CouchDesignDocument>(
                 RequestHelper.Get(RequestHelper.BuildURL(DatabaseToUse, DocumentID)));
@@ -1125,8 +1105,7 @@ namespace PillowSharp.Client
         /// <returns></returns>
         public CouchDocumentChange UpsertDesignDocument(CouchDesignDocument DesignDocument, string DatabaseToUse = null)
         {
-            DatabaseToUse = GetDBToUseForRequest(DesignDocument.GetType(), DatabaseToUse);
-            Authenticate();
+            DatabaseToUse = GetDatabaseAndAuthenticateIfNeeded(DesignDocument.GetType(), DatabaseToUse);
             if (string.IsNullOrEmpty(DesignDocument.ID) && ClientSettings.AutoGenerateID)
             {
                 if (ClientSettings.UseCouchUUID)
@@ -1165,13 +1144,27 @@ namespace PillowSharp.Client
         /// <returns></returns>
         public string GetCurrentDocumentRevision(string DocumentID, Type CouchDocumentType = null, string DatabaseToUse = null)
         {
-            DatabaseToUse = GetDBToUseForRequest(CouchDocumentType, DatabaseToUse);
+            DatabaseToUse = GetDatabaseAndAuthenticateIfNeeded(CouchDocumentType, DatabaseToUse);
             var result = RequestHelper.Head(RequestHelper.BuildURL(DatabaseToUse, DocumentID));
             return result.Header.Where(h => h.Key == "ETag").Select(h => h.Value).FirstOrDefault()?.Trim('"');
         }
         #endregion
 
         #region Private Functions        
+
+
+        /// <summary>
+        /// Used to combine Authenticate and GetDBForRequest to a single endpoint, reduce duplicated code in each call
+        /// </summary>
+        /// <param name="Document">Current document</param>
+        /// <param name="Database">Forced database for request</param>
+        /// <returns>Database to use for request</returns>
+        private string GetDatabaseAndAuthenticateIfNeeded(Type Document, string Database)
+        {
+            Authenticate();
+            return GetDBToUseForRequest(Document, Database);
+        }
+
         //Get the DB to use
         //Priority list:
         // 1. Caller Parameter

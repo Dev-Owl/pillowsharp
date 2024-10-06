@@ -28,9 +28,9 @@ namespace PillowSharp.Middleware.Default
         Uri serverURI = null;
 
         //If set call time is traced
-        public bool Trace { get; set; } //TODO add trace to the right places, #endregion
+        public bool Trace { get; set; }
 
-        public Action<TraceInformation> TraceCallBack { get; set; } //TODO call this if trace is true and provide running time in ms
+        public Action<TraceInformation> TraceCallBack { get; set; }
 
         //Create the Middleware and pass server data to it
         public BasicWebRequestHelper(ICouchdbServer Server) : base(Server)

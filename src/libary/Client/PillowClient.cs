@@ -297,11 +297,11 @@ namespace PillowSharp.Client
         /// </summary>
         /// <param name="Name">New database name</param>
         /// <returns></returns>
-        public Task<bool> CreateNewDatabaseAsync(string Name)
+        public Task<bool> CreateNewDatabaseAsync(string Name, bool Partitioned = false)
         {
             return Task.Factory.StartNew(() =>
             {
-                return CreateNewDatabase(Name);
+                return CreateNewDatabase(Name, Partitioned);
             });
         }
 
@@ -310,12 +310,19 @@ namespace PillowSharp.Client
         /// </summary>
         /// <param name="Name">New database name</param>
         /// <returns></returns>
-        public bool CreateNewDatabase(string Name)
+        public bool CreateNewDatabase(string Name, bool Partitioned = false)
         {
             //Create token if needed
             Authenticate();
+            KeyValuePair<string, object>[] queryParameter = null;
+            if (Partitioned)
+            {
+                queryParameter = new[]{
+                    new KeyValuePair<string, object>("partitioned", true)
+                };
+            }
             //Create the db via a put call
-            var result = RequestHelper.Put(Name);
+            var result = RequestHelper.Put(Name, QueryParameter: queryParameter);
             //Return response state
             return FromResponse<CouchConfirm>(result)?.Ok ?? false;
         }

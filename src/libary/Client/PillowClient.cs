@@ -318,7 +318,7 @@ namespace PillowSharp.Client
             if (Partitioned)
             {
                 queryParameter = new[]{
-                    new KeyValuePair<string, object>("partitioned", true)
+                    new KeyValuePair<string, object>("partitioned", "true")
                 };
             }
             //Create the db via a put call
@@ -327,16 +327,31 @@ namespace PillowSharp.Client
             return FromResponse<CouchConfirm>(result)?.Ok ?? false;
         }
 
+        public Task<CouchDbInfo> GetDatabaseInfoAsync(string Name)
+        {
+            return Task.Factory.StartNew(() =>
+          {
+              return GetDatabaseInfo(Name);
+          });
+        }
+
+        public CouchDbInfo GetDatabaseInfo(string Name)
+        {
+            Authenticate();
+            var result = RequestHelper.Get(Name);
+            return FromResponse<CouchDbInfo>(result);
+        }
+
         /// <summary>
         /// Delete a database on the server
         /// </summary>
         /// <param name="Name">Name of the database</param>
         /// <returns></returns>
-        public Task<bool> DeleteDatbaseAsync(string Name)
+        public Task<bool> DeleteDatabaseAsync(string Name)
         {
             return Task.Factory.StartNew(() =>
             {
-                return this.DeleteDatbase(Name);
+                return this.DeleteDatabase(Name);
             });
         }
 
@@ -345,7 +360,7 @@ namespace PillowSharp.Client
         /// </summary>
         /// <param name="Name">Name of the database</param>
         /// <returns></returns>
-        public bool DeleteDatbase(string Name)
+        public bool DeleteDatabase(string Name)
         {
             Authenticate();
             return JSONHelper.FromJSON<CouchConfirm>(RequestHelper.Delete(Name))?.Ok ?? false;

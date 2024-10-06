@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace test
 {
-    public class AuthenticationDBCreationTests : BaseTest,IDisposable
+    public class AuthenticationDBCreationTests : BaseTest, IDisposable
     {
         public AuthenticationDBCreationTests() : base("authentication_test")
         {
@@ -17,28 +17,37 @@ namespace test
         [Theory]
         [InlineData(ELoginTypes.BasicAuth)]
         [InlineData(ELoginTypes.TokenLogin)]
-        public void CreateDBBothAuth(ELoginTypes Type)
+        public async Task CreateDBBothAuth(ELoginTypes Type)
         {
-           
+
             if (!CouchSettings.SkipAuthTests)
-                LoginCreateDB(Type).Wait();
+                await LoginCreateDB(Type);
+        }
+
+        [Fact]
+        public async Task CreatePartitionedDatabase()
+        {
+            var client = GetTestClient(ELoginTypes.BasicAuth);
+            await LoginCreateDB(ELoginTypes.BasicAuth);
+
         }
 
         public void Dispose()
         {
-            if(!CouchSettings.SkipAuthTests)
+            if (!CouchSettings.SkipAuthTests)
             {
                 var client = GetTestClient();
-                client.DeleteDatbaseAsync(this.TestDB).Wait();
+                client.DeleteDatabaseAsync(this.TestDB).Wait();
             }
         }
 
-        private async Task LoginCreateDB(ELoginTypes Type){
+        private async Task LoginCreateDB(ELoginTypes Type, bool partitioned = false)
+        {
             var client = GetTestClient(Type);
-            var result = await client.CreateNewDatabaseAsync(this.TestDB);
-            Assert.True(result,$"Unable to create the db, with {Type.ToString("G")}");
-        }   
+            var result = await client.CreateNewDatabaseAsync(this.TestDB, partitioned);
+            Assert.True(result, $"Unable to create the db, with {Type.ToString("G")}");
+        }
 
-        
+
     }
 }

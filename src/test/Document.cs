@@ -336,7 +336,7 @@ namespace test
 
         public void Dispose()
         {
-            GetTestClient().DeleteDatbaseAsync(this.TestDB).Wait();
+            GetTestClient().DeleteDatabaseAsync(this.TestDB).Wait();
         }
         [Fact]
         public void TestBaseDocumentProperties()

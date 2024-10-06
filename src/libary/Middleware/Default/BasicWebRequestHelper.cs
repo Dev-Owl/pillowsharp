@@ -74,7 +74,7 @@ namespace PillowSharp.Middleware.Default
             var request = new RestRequest
             {
                 Method = Method,
-                Timeout = TimeOut * 1000,
+                Timeout = new TimeSpan(0, 0, TimeOut),
                 Resource = Resource
             };
             if (QueryParameter != null)

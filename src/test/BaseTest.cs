@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace test
+namespace PillowSharp.Tests
 {
     public abstract class BaseTest
     {

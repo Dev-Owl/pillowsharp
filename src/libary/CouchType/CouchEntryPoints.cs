@@ -21,4 +21,6 @@ public static class CouchEntryPoints
     public const string List = "_list";
 
     public const string Purge = "_purge";
+
+    public const string Partition = "_partition";
 }

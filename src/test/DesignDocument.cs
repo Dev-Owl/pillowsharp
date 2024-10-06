@@ -9,7 +9,8 @@ using PillowSharp.CouchType;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-namespace test
+
+namespace PillowSharp.Tests
 {
     public class DesignDocumentTests : BaseTest, IDisposable
     {

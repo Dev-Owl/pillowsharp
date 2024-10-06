@@ -10,7 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using Newtonsoft.Json;
-namespace test
+
+namespace PillowSharp.Tests
 {
     public class TestDocument : CouchDocument
     {
@@ -31,13 +32,13 @@ namespace test
             return new TestDocument()
             {
                 IntProp = new Random().Next(1, 23456789),
-                 StringProp = "This are not the droids you are loOking for",
-            ListProp = new List<string>() { "a", "b", "1337" },
-            SubObj =  TestDocumentSmall.GenerateTestDocumentSmall(),
-            SubObjList = new List<TestDocumentSmall>() {  TestDocumentSmall.GenerateTestDocumentSmall(), TestDocumentSmall.GenerateTestDocumentSmall() },
-            DicTest = new Dictionary<string, string>() { {"a","b" },{"c","d" } }
+                StringProp = "This are not the droids you are loOking for",
+                ListProp = new List<string>() { "a", "b", "1337" },
+                SubObj = TestDocumentSmall.GenerateTestDocumentSmall(),
+                SubObjList = new List<TestDocumentSmall>() { TestDocumentSmall.GenerateTestDocumentSmall(), TestDocumentSmall.GenerateTestDocumentSmall() },
+                DicTest = new Dictionary<string, string>() { { "a", "b" }, { "c", "d" } }
             };
-          
+
         }
 
         public bool AllSet()

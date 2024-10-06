@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace PillowSharp.Client
@@ -367,34 +368,6 @@ namespace PillowSharp.Client
         }
 
         /// <summary>
-        /// Returns general information about the database (size, doc count, etc)
-        /// </summary>
-        /// <param name="DBName">Name of the database</param>
-        /// <returns></returns>
-        /// <exception cref="CouchException">Thrown if DB does not exist</exception>
-        public Task<CouchDatabaseInformation> GetDatabaseInformationAsync(String DBName)
-        {
-            return Task.Factory.StartNew(() =>
-            {
-                return this.GetDatabaseInformation(DBName);
-            });
-        }
-
-        /// <summary>
-        /// Returns general information about the database (size, doc count, etc)
-        /// </summary>
-        /// <param name="DBName">Name of the database</param>
-        /// <returns></returns>
-        /// <exception cref="CouchException">Thrown if DB does not exist</exception>
-        public CouchDatabaseInformation GetDatabaseInformation(String DBName)
-        {
-            Authenticate();
-            var response = RequestHelper.Get(DBName);
-            var info = JSONHelper.FromJSON<CouchDatabaseInformation>(response);
-            return info;
-        }
-
-        /// <summary>
         /// Runs the provided query against a database
         /// </summary>
         /// <param name="query">Mango query to execute</param>
@@ -480,6 +453,23 @@ namespace PillowSharp.Client
             });
         }
 
+
+        public Task<PartitionInfo> GetPartitionInfoAsync(string PartitionId, string Database = null)
+        {
+            return Task.Factory.StartNew(() =>
+                       {
+                           return GetPartitionInfo(PartitionId, Database);
+                       });
+        }
+
+        public PartitionInfo GetPartitionInfo(string PartitionId, string Database = null)
+        {
+            var databaseToUse = GetDatabaseAndAuthenticateIfNeeded(null, Database);
+            var url = RequestHelper.BuildURL(databaseToUse, CouchEntryPoints.Partition, PartitionId);
+            var response = RequestHelper.Get(url);
+            return FromResponse<PartitionInfo>(response);
+        }
+
         #endregion
 
         #region Document Functions
@@ -534,6 +524,7 @@ namespace PillowSharp.Client
             }
             return result;
         }
+
 
         /// <summary>
         /// Delete a single document in the db

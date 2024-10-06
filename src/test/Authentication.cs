@@ -6,7 +6,7 @@ using PillowSharp.BaseObject;
 using PillowSharp.Middleware.Default;
 using System.Threading.Tasks;
 
-namespace test
+namespace PillowSharp.Tests
 {
     public class AuthenticationDBCreationTests : BaseTest, IDisposable
     {

@@ -5,7 +5,7 @@ using PillowSharp.BaseObject;
 using PillowSharp.CouchType;
 using Xunit;
 
-namespace test
+namespace PillowSharp.Tests
 {
     public class DatabaseTest : BaseTest, IDisposable
     {

@@ -18,20 +18,8 @@
                          - Moved test and example to NET8.0
                          Path 0.1:
                          - Fix Mango query generation due to NewtonsoftJson chnage
-                         - Allow null in SimpleSelector for Mango query
-                         V3.X Major feature:
-                         -Added support for Mango Queries
-                         -Added support for tracing 
-                         Patch 0.1:
-                         -Removed a constraint from Mango functions
                          Patch 0.2:
-                         -Minor updates / fixes
-                         Patch 0.3:
-                         -Added support for list calls
-                         Patch 0.4:
-                         -Added support for purge opertaion
-                         Patch 0.5:
-                         -Added support for run function on multiple db
+                         - Allow null in SimpleSelector for Mango query
     </PackageReleaseNotes>
 
   </PropertyGroup>

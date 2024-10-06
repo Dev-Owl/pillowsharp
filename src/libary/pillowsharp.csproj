@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>PillowSharp</PackageId>
-    <Version>4.0.2</Version>
+    <Version>4.1.0</Version>
     <Authors>Christian Muehle info@devowl.de</Authors>
     <Company>DevOwl</Company>
     <RepositoryUrl>https://github.com/Dev-Owl/pillowsharp</RepositoryUrl>
@@ -20,6 +20,12 @@
                          - Fix Mango query generation due to NewtonsoftJson chnage
                          Patch 0.2:
                          - Allow null in SimpleSelector for Mango query
+                         V4.1 update:
+                         - Addeded MagoQuery Helper to create Mango Queries with less code
+                         - Added support for Partitioned database
+                            - Mango
+                            - Desigin docs
+                            - Partition endpoint
     </PackageReleaseNotes>
 
   </PropertyGroup>

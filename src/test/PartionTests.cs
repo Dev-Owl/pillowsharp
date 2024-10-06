@@ -42,6 +42,33 @@ namespace PillowSharp.Tests
             Assert.Equal(0, result.DocCount);
         }
 
+        [Fact]
+        public async Task GetAllDocumentsOfPartition()
+        {
+            // Arrange
+            var client = GetTestClient(BaseObject.ELoginTypes.BasicAuth);
+            await client.CreateNewDatabaseAsync(TestDB, Partitioned: true);
+
+            var testDoc1 = TestDocument.GenerateTestObject();
+            testDoc1.ID = "test_partion:1234";
+            var result1 = await client.CreateANewDocumentAsync(testDoc1, TestDB);
+            Assert.True(result1.Ok);
+
+            var testDoc2 = TestDocument.GenerateTestObject();
+            testDoc2.ID = "test_partion:5678";
+            var result2 = await client.CreateANewDocumentAsync(testDoc2, TestDB);
+            Assert.True(result2.Ok);
+
+            // Act
+            var documents = await client.GetAllDocumentsAsync(DatabaseToUse: TestDB, PartitionToUse: "test_partion");
+
+            // Assert
+            Assert.NotNull(documents);
+            Assert.Equal(2, documents.Rows.Count);
+            Assert.Contains(documents.Rows, doc => doc.ID == "test_partion:1234");
+            Assert.Contains(documents.Rows, doc => doc.ID == "test_partion:5678");
+        }
+
 
         public void Dispose()
         {

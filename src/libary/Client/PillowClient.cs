@@ -731,11 +731,11 @@ namespace PillowSharp.Client
         /// <param name="Document">Optional, Document type, used to get the DB</param>
         /// <param name="DatabaseToUse">Optional, Database for this request</param>
         /// <returns></returns>
-        public Task<CouchDocumentResponse<CouchViewResponse<AllDocResponse>>> GetAllDocumentsAsync(Type Document = null, string DatabaseToUse = null)
+        public Task<CouchDocumentResponse<CouchViewResponse<AllDocResponse>>> GetAllDocumentsAsync(Type Document = null, string DatabaseToUse = null, string PartitionToUse = null)
         {
             return Task.Factory.StartNew(() =>
             {
-                return GetAllDocuments(Document, DatabaseToUse);
+                return GetAllDocuments(Document, DatabaseToUse, PartitionToUse);
             });
         }
 
@@ -745,11 +745,19 @@ namespace PillowSharp.Client
         /// <param name="Document">Optional, Document type, used to get the DB</param>
         /// <param name="DatabaseToUse">Optional, Database for this request</param>
         /// <returns></returns>
-        public CouchDocumentResponse<CouchViewResponse<AllDocResponse>> GetAllDocuments(Type Document = null, string DatabaseToUse = null)
+        public CouchDocumentResponse<CouchViewResponse<AllDocResponse>> GetAllDocuments(Type Document = null, string DatabaseToUse = null, string PartitionToUse = null)
         {
             DatabaseToUse = GetDatabaseAndAuthenticateIfNeeded(Document, DatabaseToUse); // Get database to use
+            var urlParts = new List<string> { DatabaseToUse };
+            if (string.IsNullOrEmpty(PartitionToUse) == false)
+            {
+                urlParts.Add(CouchEntryPoints.Partition);
+                urlParts.Add(PartitionToUse);
+            }
+            urlParts.Add(CouchEntryPoints.AllDocs);
+
             return JSONHelper.FromJSON<CouchDocumentResponse<CouchViewResponse<AllDocResponse>>>(
-                RequestHelper.Get(RequestHelper.BuildURL(DatabaseToUse, CouchEntryPoints.AllDocs))); //return result to client
+                RequestHelper.Get(RequestHelper.BuildURL(urlParts.ToArray()))); //return result to client
         }
 
         /// <summary>

@@ -44,7 +44,7 @@ namespace PillowSharp.Middleware
 
         public abstract Task<RestResponse> GetFileAsync(string ID, string AttachmentName, string Revision, string Database);
 
-        public abstract Task<RestResponse> ViewAsync(string Database, string DocumentName, string ViewFunctionName, KeyValuePair<string, object>[] QueryParameter, HttpRequestMethod HTTPMethod, string Filter);
+        public abstract Task<RestResponse> ViewAsync(string Database, string DocumentName, string ViewFunctionName, KeyValuePair<string, object>[] QueryParameter, HttpRequestMethod HTTPMethod, string Filter, string partition = null);
 
         public abstract Task<RestResponse> HeadAsync(string Uri);
 
@@ -66,7 +66,7 @@ namespace PillowSharp.Middleware
 
         public abstract RestResponse GetFile(string ID, string AttachmentName, string Revision, string Database);
 
-        public abstract RestResponse View(string Database, string DocumentName, string ViewFunctionName, KeyValuePair<string, object>[] QueryParameter, HttpRequestMethod HTTPMethod, string Filter);
+        public abstract RestResponse View(string Database, string DocumentName, string ViewFunctionName, KeyValuePair<string, object>[] QueryParameter, HttpRequestMethod HTTPMethod, string Filter, string partition = null);
 
         public abstract pillowsharp.Middleware.RestResponse List(string database, string designDocumentId, string filterName, string ViewName, KeyValuePair<string, object>[] queryParameter);
 

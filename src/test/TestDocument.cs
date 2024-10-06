@@ -13,6 +13,8 @@ using Newtonsoft.Json;
 
 namespace PillowSharp.Tests
 {
+
+
     public class TestDocument : CouchDocument
     {
         public int IntProp { get; set; }

@@ -269,21 +269,33 @@ namespace PillowSharp.Middleware.Default
             }
         }
 
-        public override Task<pillowsharp.Middleware.RestResponse> ViewAsync(string Database, string DocumentName, string ViewFunctionName, KeyValuePair<string, object>[] QueryParameter, HttpRequestMethod HTTPMethod, string Filter)
+        public override Task<pillowsharp.Middleware.RestResponse> ViewAsync(string Database, string DocumentName, string ViewFunctionName, KeyValuePair<string, object>[] QueryParameter, HttpRequestMethod HTTPMethod, string Filter, string partition = null)
         {
             return Task.Factory.StartNew(() =>
             {
-                return View(Database, DocumentName, ViewFunctionName, QueryParameter, HTTPMethod, Filter);
+                return View(Database, DocumentName, ViewFunctionName, QueryParameter, HTTPMethod, Filter, partition);
             });
         }
         //Run, change or create the given view
-        public override pillowsharp.Middleware.RestResponse View(string Database, string DocumentName, string ViewFunctionName, KeyValuePair<string, object>[] QueryParameter, HttpRequestMethod HTTPMethod, string Filter)
+        public override pillowsharp.Middleware.RestResponse View(string Database, string DocumentName, string ViewFunctionName, KeyValuePair<string, object>[] QueryParameter, HttpRequestMethod HTTPMethod, string Filter, string partition = null)
         {
             //Ensure we can match the "new" restsharp http methdo enum
             if (Enum.TryParse(HTTPMethod.ToString(), true, out Method targetHttpMethod) == false)
                 throw new PillowException($"Unable to use {HTTPMethod} as a request method in the default WebRequestHelper");
 
-            var viewRequest = BuildRequestBase(BuildURL(Database, DocumentName, CouchEntryPoints.ViewDoc, ViewFunctionName),
+            var urlParts = new List<string>(){
+                Database
+            };
+            if (string.IsNullOrEmpty(partition) == false)
+            {
+                urlParts.Add(CouchEntryPoints.Partition);
+                urlParts.Add(partition);
+            }
+            urlParts.Add(DocumentName);
+            urlParts.Add(CouchEntryPoints.ViewDoc);
+            urlParts.Add(ViewFunctionName);
+
+            var viewRequest = BuildRequestBase(BuildURL(urlParts.ToArray()),
                                           QueryParameter: QueryParameter, Method: targetHttpMethod);
             if (!string.IsNullOrEmpty(Filter))
                 AddJSONBody(viewRequest, Filter);

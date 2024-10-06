@@ -950,11 +950,11 @@ namespace PillowSharp.Client
         /// <param name="QueryParameter">Optional query parameter for the view</param>
         /// <param name="DatabaseToUse">Optional, Database for this request</param>
         /// <returns></returns>
-        public Task<CouchDocumentResponse<T>> GetViewAsync<T>(string DocumentID, string ViewName, KeyValuePair<string, object>[] QueryParameter = null, string DatabaseToUse = null) where T : new()
+        public Task<CouchDocumentResponse<T>> GetViewAsync<T>(string DocumentID, string ViewName, KeyValuePair<string, object>[] QueryParameter = null, string DatabaseToUse = null, string partition = null) where T : new()
         {
             return Task.Factory.StartNew(() =>
             {
-                return GetView<T>(DocumentID, ViewName, QueryParameter, DatabaseToUse);
+                return GetView<T>(DocumentID, ViewName, QueryParameter, DatabaseToUse, partition);
             });
         }
 
@@ -967,12 +967,12 @@ namespace PillowSharp.Client
         /// <param name="QueryParameter">Optional query parameter for the view</param>
         /// <param name="DatabaseToUse">Optional, Database for this request</param>
         /// <returns></returns>
-        public CouchDocumentResponse<T> GetView<T>(string DocumentID, string ViewName, KeyValuePair<string, object>[] QueryParameter = null, string DatabaseToUse = null) where T : new()
+        public CouchDocumentResponse<T> GetView<T>(string DocumentID, string ViewName, KeyValuePair<string, object>[] QueryParameter = null, string DatabaseToUse = null, string partition = null) where T : new()
         {
             DatabaseToUse = GetDatabaseAndAuthenticateIfNeeded(typeof(T), DatabaseToUse);
             DocumentID = EnsureDocumentIDIsValidDesignDocumentID(DocumentID);
             return JSONHelper.FromJSON<CouchDocumentResponse<T>>(
-                RequestHelper.View(DatabaseToUse, DocumentID, ViewName, QueryParameter, HttpRequestMethod.GET, null));
+                RequestHelper.View(DatabaseToUse, DocumentID, ViewName, QueryParameter, HttpRequestMethod.GET, null, partition));
         }
 
         /// <summary>

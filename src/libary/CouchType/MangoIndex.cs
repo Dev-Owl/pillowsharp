@@ -26,7 +26,7 @@ namespace PillowSharp.CouchType
         public MangoSelector PartialSelector { get; set; }
 
         [JsonProperty(PropertyName = "partitioned")]
-        public bool Partitioned { get; set; }
+        public bool? Partitioned { get; set; }
     }
 
     public class MangoIndexFields

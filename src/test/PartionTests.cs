@@ -70,6 +70,10 @@ namespace PillowSharp.Tests
             Assert.Equal(2, documents.Rows.Count);
             Assert.Contains(documents.Rows, doc => doc.ID == "test_partion:1234");
             Assert.Contains(documents.Rows, doc => doc.ID == "test_partion:5678");
+            foreach (var doc in documents.Rows)
+            {
+                Assert.StartsWith("test_partion:", doc.ID);
+            }
         }
 
         [Fact]

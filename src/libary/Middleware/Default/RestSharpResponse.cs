@@ -30,6 +30,12 @@ namespace pillowsharp.Middleware.Default
             {
                 this.Header.Add(new KeyValuePair<string, string>(header.Name, header.Value?.ToString()));
             }
+            this.ContentHeader = new List<KeyValuePair<string, string>>();
+            foreach (var header in Response.ContentHeaders.Where(h => h.Type == ParameterType.HttpHeader))
+            {
+                if (this.ContentHeader.Any(h => h.Key == header.Name)) continue;
+                this.ContentHeader.Add(new KeyValuePair<string, string>(header.Name, header.Value?.ToString()));
+            }
 
         }
     }

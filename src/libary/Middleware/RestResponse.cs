@@ -15,7 +15,9 @@ namespace pillowsharp.Middleware
 
         public IEnumerable<SimpleCookie> Cookies { get; internal set; }
 
-        public List<KeyValuePair<string,string>> Header { get; internal set; }
+        public List<KeyValuePair<string, string>> Header { get; internal set; }
+
+        public List<KeyValuePair<string, string>> ContentHeader { get; internal set; }
 
     }
 
@@ -26,5 +28,5 @@ namespace pillowsharp.Middleware
         public string Value { get; internal set; }
     }
 
-    
+
 }

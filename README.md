@@ -2,6 +2,18 @@
 [![NuGet version (PillowSharp)](https://img.shields.io/nuget/v/PillowSharp.svg?style=flat-square)](https://www.nuget.org/packages/PillowSharp/)
 [![Build Status](https://travis-ci.org/Dev-Owl/pillowsharp.svg?branch=master)](https://travis-ci.org/Dev-Owl/pillowsharp)
 
+# What's new?
+
+* Since 4.1.X Pillow supports Partitioned Databases (for more information check the [CouchDB docs](https://docs.couchdb.org/en/latest/partitioned-dbs/index.html#partitioned-dbs)
+* Updated all dependecy packages to latest version
+* Added Helper class to create Mango queries quicker
+
+
+# What will come?
+* Looking into full text search support (for both current ways)
+
+
+
 ## Content
 * Description
 * Setup

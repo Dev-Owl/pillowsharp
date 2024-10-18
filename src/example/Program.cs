@@ -41,7 +41,7 @@ namespace test
                 client.Trace = true;
                 try
                 {
-                    client.DeleteDatbase("pillow");
+                    client.DeleteDatabase("pillow");
                 }
                 catch
                 {

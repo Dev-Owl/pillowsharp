@@ -11,6 +11,11 @@
 
 # What will come?
 * Looking into full text search support (for both current ways)
+* Backup and restore of a db
+* Replication end point support
+* Replication status check
+* Replication conflict support
+
 
 
 
@@ -44,18 +49,10 @@ To build the library and to run the unit tests, please follow the instructions b
 
 **Please note:** If you are using CouchDB 2.X there are some changes to the configure a development enviorment you can use the dev_couch2_setup.sh/bat file. It will configure a single node instance with the default admin used also in the unit tests.
 
-In case you encounter issues in step 5, please check the CouchSettings.cs file if all configurations are correct for your instance of CouchDB. If you still have issues or questions, please open an issue or contact me.
+In case you encounter issues in step 5 (running test cases), please check the CouchSettings.cs file if all configurations are correct for your instance of CouchDB. If you still have issues or questions, please open an issue or contact me.
 
 ## Install
 Either you can clone the repository and run the related build script (please see the Setup section) or download a build from nuget.org
-
-## Planned features
-The following things will be added, or at least I would like to add them:
-
-* Replication end point support
-* Replication status check
-* Replication conflict support
-* Backup and restore of a db (will be in a different tool)
 
 # Basic usage
 All communication with CouchDB uses the PillowClient class, you can generate a new instance like this:

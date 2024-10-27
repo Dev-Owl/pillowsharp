@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>PillowSharp</PackageId>
-    <Version>4.1.2</Version>
+    <Version>4.1.3</Version>
     <Authors>Christian Muehle info@devowl.de</Authors>
     <Company>DevOwl</Company>
     <RepositoryUrl>https://github.com/Dev-Owl/pillowsharp</RepositoryUrl>
@@ -30,6 +30,9 @@
                         - Changed MangoIndex Partitioned flag to nullable bool, to use default couchdb behavior
                         Patch 4.1.2:
                         - Pass ContentHeader for rest response in Middleware
+                        Patch 4.1.3:
+                        - Added support for System.Text.Json as alternative to Newtonsoft.Json for attributes (not supported for Mango Query generation)
+                        - New tooling for better debugging and testing, allows you to create documents based on a provided template
     </PackageReleaseNotes>
 
   </PropertyGroup>

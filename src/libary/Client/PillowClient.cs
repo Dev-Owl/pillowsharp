@@ -267,6 +267,9 @@ namespace PillowSharp.Client
             return GetListOfAllDatabases().Contains(Name);
         }
 
+        //TODO Add a method to use the GET _scheduler/jobs endpoint
+
+
         /// <summary>
         /// Get a list of all current dbs
         /// </summary>

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>PillowSharp</PackageId>
-    <Version>4.1.3</Version>
+    <Version>4.1.4</Version>
     <Authors>Christian Muehle info@devowl.de</Authors>
     <Company>DevOwl</Company>
     <RepositoryUrl>https://github.com/Dev-Owl/pillowsharp</RepositoryUrl>
@@ -33,6 +33,8 @@
                         Patch 4.1.3:
                         - Added support for System.Text.Json as alternative to Newtonsoft.Json for attributes (not supported for Mango Query generation)
                         - New tooling for better debugging and testing, allows you to create documents based on a provided template
+                        Patch 4.1.4:
+                        - Fixed null reference exception in RestSharpResponse due to Header data not being set
     </PackageReleaseNotes>
 
   </PropertyGroup>

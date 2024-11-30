@@ -1,19 +1,20 @@
 # Pillowsharp
 [![NuGet version (PillowSharp)](https://img.shields.io/nuget/v/PillowSharp.svg?style=flat-square)](https://www.nuget.org/packages/PillowSharp/)
-[![Build Status](https://travis-ci.org/Dev-Owl/pillowsharp.svg?branch=master)](https://travis-ci.org/Dev-Owl/pillowsharp)
+
 
 # What's new?
 
 * Since 4.1.X Pillow supports Partitioned Databases (for more information check the [CouchDB docs](https://docs.couchdb.org/en/latest/partitioned-dbs/index.html#partitioned-dbs)
 * Updated all dependecy packages to latest version
 * Added Helper class to create Mango queries quicker
+* NEW tool to create data based on a JSON schema to help testing "CushionData"
 
 
 # What will come?
-* Looking into full text search support (for both current ways)
+* Looking into full text search support
 * Backup and restore of a db
-* Replication end point support
-* Replication status check
+* Replication end point support (DONE, 4.1.5 or newer)
+* Replication status check (DONE, 4.1.5 or newer)
 * Replication conflict support
 
 

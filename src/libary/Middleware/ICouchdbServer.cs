@@ -3,10 +3,13 @@ using PillowSharp.BaseObject;
 
 namespace PillowSharp.Middleware
 {
-    public interface ICouchdbServer{
+    public interface ICouchdbServer
+    {
         string GetServerURL();
-        ELoginTypes LoginType {get;}
+        ELoginTypes LoginType { get; }
 
         CouchLoginData GetLoginData();
+
+        int GetTimeout();
     }
 }

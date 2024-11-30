@@ -13,11 +13,14 @@ namespace PillowSharp.Middleware.Default
 
         public ELoginTypes LoginType { get { return _loginType; } set { _loginType = value; } }
 
-        public BasicCouchDBServer(string ServerURL,CouchLoginData LoginData = null,ELoginTypes LoginType = ELoginTypes.None)
+        public int TimeoutInSeconds { get; set; }
+
+        public BasicCouchDBServer(string ServerURL, CouchLoginData LoginData = null, ELoginTypes LoginType = ELoginTypes.None, int TimeoutInSeconds = 30)
         {
             _loginType = LoginType;
             _loginData = LoginData;
             _serverURL = ServerURL;
+            this.TimeoutInSeconds = TimeoutInSeconds;
         }
 
         public CouchLoginData GetLoginData()
@@ -28,6 +31,11 @@ namespace PillowSharp.Middleware.Default
         public string GetServerURL()
         {
             return _serverURL;
+        }
+
+        public int GetTimeout()
+        {
+            return TimeoutInSeconds;
         }
     }
 }

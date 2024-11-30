@@ -34,7 +34,11 @@ namespace PillowSharp.Middleware.Default
 
         public T FromJSON<T>(RestResponse Response) where T : new()
         {
-            if (Response.ResponseCode == HttpStatusCode.OK || Response.ResponseCode == HttpStatusCode.Created)
+            if (Response.ResponseCode == HttpStatusCode.OK
+                || Response.ResponseCode == HttpStatusCode.Created
+                || Response.ResponseCode == HttpStatusCode.Accepted
+                || Response.ResponseCode == HttpStatusCode.NoContent
+                || Response.ResponseCode == HttpStatusCode.PartialContent)
             {
                 //Get the normal object as requested
                 return FromJSON<T>(Response.Content);

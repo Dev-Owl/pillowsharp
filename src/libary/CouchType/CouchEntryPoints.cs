@@ -23,4 +23,8 @@ public static class CouchEntryPoints
     public const string Purge = "_purge";
 
     public const string Partition = "_partition";
+
+    public const string SchedulerJobs = "_scheduler/jobs";
+
+    public static string Replicate => "_replicate";
 }

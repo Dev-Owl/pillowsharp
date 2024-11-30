@@ -62,7 +62,7 @@ namespace PillowSharp.Middleware.Default
             {
                 clientOptions = new RestClientOptions(Server.GetServerURL());
             }
-
+            clientOptions.Timeout = new TimeSpan(0, 0, Server.GetTimeout());
 
 
             //Creteate the rest clinet

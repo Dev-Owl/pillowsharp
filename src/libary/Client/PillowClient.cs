@@ -267,7 +267,61 @@ namespace PillowSharp.Client
             return GetListOfAllDatabases().Contains(Name);
         }
 
-        //TODO Add a method to use the GET _scheduler/jobs endpoint
+        /// <summary>
+        /// Gets the list of replication jobs from the scheduler
+        /// </summary>
+        /// <returns>SchedulerResponse containing active replication jobs</returns>
+        public Task<SchedulerResponse> GetSchedulerJobsAsync(int? limit = null, int? skip = null)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return this.GetSchedulerJobs(limit, skip);
+            });
+        }
+
+        /// <summary>
+        /// Gets the list of replication jobs from the scheduler
+        /// </summary>
+        /// <returns>SchedulerResponse containing active replication jobs</returns>
+        public SchedulerResponse GetSchedulerJobs(int? limit = null, int? skip = null)
+        {
+            //Create token if needed
+            Authenticate();
+            //Make the request to get the scheduler jobs
+            var result = RequestHelper.Get(CouchEntryPoints.SchedulerJobs);
+            //return result
+            return FromResponse<SchedulerResponse>(result);
+        }
+
+        /// <summary>
+        /// Triggers a replication operation between source and target databases
+        /// </summary>
+        /// <param name="request">The replication configuration</param>
+        /// <returns>Response containing replication details</returns>
+        public Task<ReplicationResponse> CreateReplicationAsync(ReplicationRequest request)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return this.CreateReplication(request);
+            });
+        }
+
+        /// <summary>
+        /// Triggers a replication operation between source and target databases
+        /// </summary>
+        /// <param name="request">The replication configuration</param>
+        /// <returns>Response containing replication details</returns>
+        public ReplicationResponse CreateReplication(ReplicationRequest request)
+        {
+            //Create token if needed
+            Authenticate();
+            //Make the request to start replication
+            var result = RequestHelper.Post(CouchEntryPoints.Replicate, JSONHelper.ToJSON(request));
+            //return result
+            return FromResponse<ReplicationResponse>(result);
+        }
+
+
 
 
         /// <summary>
